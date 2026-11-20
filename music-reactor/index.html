@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#000000" />
+    <title>音画频谱星环 · Audio Shader Lab</title>
+    <meta name="description" content="实时 Web Audio 频谱分析。内置合成鼓点即可开演，也可载入本地音频或麦克风，在四种 GLSL 视觉间切换。" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <style>html,body{margin:0;background:#000;height:100%;overflow:hidden}</style>
+  </head>
+  <body>
+    <canvas id="stage"></canvas>
+    <div id="hud"></div>
+    <script type="module" src="/src/scenes/music-reactor/main.ts"></script>
+  </body>
+</html>

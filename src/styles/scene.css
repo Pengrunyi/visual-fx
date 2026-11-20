@@ -1,0 +1,211 @@
+@import "./global.css";
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+#stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.hud {
+  position: fixed;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 20;
+  width: min(360px, calc(100vw - 24px));
+  user-select: none;
+}
+
+.hud-toggle {
+  margin-left: auto;
+  display: flex;
+  backdrop-filter: blur(14px);
+  background: rgba(8, 10, 16, 0.72);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+}
+
+.hud-panel {
+  backdrop-filter: blur(16px);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+  max-height: min(72vh, 560px);
+  overflow: auto;
+  touch-action: pan-y;
+}
+
+.hud-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.hud-head h1 {
+  font-size: 15px;
+  line-height: 1.3;
+  margin: 0;
+  font-weight: 650;
+}
+
+.hud-actions, .hud-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hud-actions { margin-bottom: 10px; }
+
+.hud-controls {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.hud-controls label.row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.hud-controls input[type="range"] {
+  width: 100%;
+  accent-color: #d5e2ff;
+}
+
+.hud-controls select,
+.hud-controls input[type="text"],
+.hud-controls textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 8px 10px;
+}
+
+.hud-controls textarea { min-height: 68px; resize: vertical; }
+
+.hud-note {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  transform: translateX(-50%) translateY(12px);
+  background: rgba(8, 10, 16, 0.9);
+  border: 1px solid var(--line);
+  padding: 10px 14px;
+  border-radius: 999px;
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  font-size: 13px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.intro {
+  position: fixed;
+  left: max(16px, env(safe-area-inset-left));
+  top: max(16px, env(safe-area-inset-top));
+  z-index: 15;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  text-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+}
+
+.intro.show { opacity: 1; transform: none; }
+.intro.hide { opacity: 0; }
+
+.intro strong {
+  display: block;
+  font-size: clamp(22px, 5vw, 36px);
+  letter-spacing: 0.02em;
+}
+
+.intro span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.greet-card {
+  position: fixed;
+  left: max(14px, env(safe-area-inset-left));
+  top: max(14px, env(safe-area-inset-top));
+  z-index: 16;
+  max-width: min(280px, calc(100vw - 28px));
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(10, 14, 18, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.greet-card .to { color: #ffd0d6; font-size: 13px; }
+.greet-card .msg {
+  margin: 4px 0;
+  font-size: 18px;
+  line-height: 1.35;
+}
+.greet-card .from { color: var(--muted); font-size: 12px; }
+
+.modal-back {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
+}
+
+.modal {
+  width: min(420px, 100%);
+  background: #12151e;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: max(0px, env(safe-area-inset-bottom));
+}
+
+.modal h2 { margin: 0 0 10px; font-size: 16px; }
+
+.modal label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 8px 0;
+}
+
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+.hidden { display: none !important; }
