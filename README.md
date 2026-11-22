@@ -20,12 +20,15 @@ Mobile-first visual scenes with **zero external network dependencies**. Built fo
 | `/snow-globe/` | 3D 水晶球音乐盒 · Winter Snow Globe |
 | `/music-reactor/` | 音画频谱星环 · Audio Shader Lab |
 | `/milk-frog/` | 奶蛙手势互动 · Milk Frog |
+| `/me/` | 手势互动 · 真人版 |
 
 Christmas cards accept `?to=朋友&msg=圣诞快乐&from=署名`. The in-page editor copies a personalized link.
 
 圣诞场景支持贺卡参数，页内可填写收礼人、祝福和署名并复制微信链接。
 
 奶蛙页用摄像头识别挥手、剪刀手、握拳和按住的张开手掌（也可按 `1-4`）。`@mediapipe/tasks-vision` 的 JS 打进包里；构建时把 `vision_wasm_internal` / `vision_wasm_nosimd_internal` 的 js 与 wasm 复制到 `dist/milk-frog/wasm/`。`public/milk-frog/hand_landmarker.task` 是已提交的 float16 手部模型（约 7.8MB，Apache-2.0）。页面只请求这些站内路径。
+
+`/me/` 用同一套识别和同一份 wasm / 模型（不再复制那 7.8MB 文件）。身体是 `public/me/person.webp`，头是按 `layout.json` 叠在脖子支点上的 `head.png`，会呼吸、挥手、跳跃和受惊。
 
 ## Develop · 开发
 

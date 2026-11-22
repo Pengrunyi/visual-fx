@@ -129,6 +129,19 @@ export const scenes: readonly SceneInfo[] = [
     accent: '#ffe14a',
     accent2: '#fff3d2',
   },
+  {
+    slug: 'me',
+    route: '/me/',
+    titleZh: '手势互动',
+    titleEn: 'Real Gesture',
+    pageTitle: '手势互动 · 真人版',
+    blurbZh: '挥手、比耶、握拳或按住张掌，真人会回应。',
+    blurbEn: 'Wave, peace, fist, or a held open palm, and he reacts.',
+    description:
+      '摄像头识别挥手、剪刀手、握拳和按住的张开手掌，真人会挥手、跳跃或惊讶。也可按 1-4。',
+    accent: '#d5deee',
+    accent2: '#7f9bb8',
+  },
 ] as const;
 
 export function sceneBySlug(slug: string): SceneInfo | undefined {
