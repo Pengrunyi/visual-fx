@@ -11,6 +11,7 @@
     "check:cdn": "node --experimental-strip-types scripts/check-no-cdn.ts"
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "0.10.14",
     "three": "^0.181.0"
   },
   "devDependencies": {

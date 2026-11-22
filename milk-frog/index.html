@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#102418" />
+    <title>奶蛙手势互动 · Milk Frog</title>
+    <meta name="description" content="摄像头识别挥手、剪刀手、握拳和按住的张开手掌，奶蛙会单臂挥手、跳跃或惊讶。也可按 1-4。" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+  </head>
+  <body class="milk">
+    <div class="page">
+      <header>
+        <h1>用手势，让它做个反应</h1>
+        <p class="sub">奶蛙手势互动 · Milk Frog</p>
+      </header>
+      <div class="frog-wrap">
+        <svg id="frog" data-reaction="idle" viewBox="0 0 480 560" role="img" aria-label="黄色奶蛙，奶油色肚子">
+          <defs>
+            <radialGradient id="body-grad" cx="42%" cy="32%" r="72%">
+              <stop offset="0%" stop-color="#ffe978"/>
+              <stop offset="58%" stop-color="#ffc83a"/>
+              <stop offset="100%" stop-color="#e8a020"/>
+            </radialGradient>
+            <radialGradient id="belly-grad" cx="50%" cy="36%" r="75%">
+              <stop offset="0%" stop-color="#fffdf8"/>
+              <stop offset="100%" stop-color="#ffe3b8"/>
+            </radialGradient>
+          </defs>
+          <g id="ground">
+            <ellipse cx="240" cy="518" rx="168" ry="26" fill="#1c7a3e"/>
+            <ellipse cx="240" cy="510" rx="148" ry="18" fill="#3cb85f"/>
+            <path d="M240 494 v32" stroke="#1f7a3c" stroke-width="3" stroke-linecap="round"/>
+            <ellipse id="shadow" cx="240" cy="474" rx="96" ry="12" fill="#06210f" opacity="0.28"/>
+          </g>
+          <g id="frog-bob">
+            <g id="frog-breathe">
+              <g id="arm-left" data-pivot="132 292">
+                <path d="M132 292 C96 338 78 386 98 428" fill="none" stroke="#3a2a12" stroke-width="42" stroke-linecap="round"/>
+                <path d="M132 292 C96 338 78 386 98 428" fill="none" stroke="#ffd34a" stroke-width="32" stroke-linecap="round"/>
+                <circle cx="102" cy="440" r="22" fill="#ffe56a" stroke="#3a2a12" stroke-width="4"/>
+              </g>
+              <g id="arm-right" data-pivot="348 292">
+                <path d="M348 292 C384 338 402 386 382 428" fill="none" stroke="#3a2a12" stroke-width="42" stroke-linecap="round"/>
+                <path d="M348 292 C384 338 402 386 382 428" fill="none" stroke="#ffd34a" stroke-width="32" stroke-linecap="round"/>
+                <circle cx="378" cy="440" r="22" fill="#ffe56a" stroke="#3a2a12" stroke-width="4"/>
+              </g>
+              <ellipse cx="164" cy="418" rx="52" ry="30" fill="#f0b42c" stroke="#3a2a12" stroke-width="4" transform="rotate(-24 164 418)"/>
+              <ellipse cx="316" cy="418" rx="52" ry="30" fill="#f0b42c" stroke="#3a2a12" stroke-width="4" transform="rotate(24 316 418)"/>
+              <ellipse cx="240" cy="292" rx="126" ry="116" fill="url(#body-grad)" stroke="#3a2a12" stroke-width="5"/>
+              <ellipse cx="240" cy="328" rx="76" ry="70" fill="url(#belly-grad)"/>
+              <ellipse cx="148" cy="236" rx="18" ry="11" fill="#e8ae28" opacity="0.8"/>
+              <ellipse cx="334" cy="230" rx="16" ry="10" fill="#e8ae28" opacity="0.75"/>
+              <ellipse cx="118" cy="456" rx="42" ry="16" fill="#ffe56a" stroke="#3a2a12" stroke-width="4"/>
+              <ellipse cx="362" cy="456" rx="42" ry="16" fill="#ffe56a" stroke="#3a2a12" stroke-width="4"/>
+              <ellipse cx="128" cy="270" rx="18" ry="12" fill="#ff9d88" opacity="0.9"/>
+              <ellipse cx="352" cy="270" rx="18" ry="12" fill="#ff9d88" opacity="0.9"/>
+              <ellipse cx="222" cy="268" rx="5" ry="4" fill="#3a2a12"/>
+              <ellipse cx="258" cy="268" rx="5" ry="4" fill="#3a2a12"/>
+              <g id="eye-left">
+                <ellipse cx="176" cy="214" rx="46" ry="48" fill="#fffdf8" stroke="#3a2a12" stroke-width="5"/>
+                <g id="pupil-left">
+                  <ellipse cx="188" cy="222" rx="16" ry="20" fill="#24180f"/>
+                  <ellipse cx="180" cy="212" rx="6" ry="6" fill="#fff"/>
+                </g>
+              </g>
+              <g id="eye-right">
+                <ellipse cx="304" cy="214" rx="46" ry="48" fill="#fffdf8" stroke="#3a2a12" stroke-width="5"/>
+                <g id="pupil-right">
+                  <ellipse cx="292" cy="222" rx="16" ry="20" fill="#24180f"/>
+                  <ellipse cx="284" cy="212" rx="6" ry="6" fill="#fff"/>
+                </g>
+              </g>
+              <path id="mouth-smile" d="M188 292 Q240 332 292 292" fill="none" stroke="#3a2a12" stroke-width="5" stroke-linecap="round"/>
+              <path id="mouth-happy" d="M174 286 Q240 352 306 286 Q240 316 174 286 Z" fill="#e25b62" stroke="#3a2a12" stroke-width="5" stroke-linejoin="round" visibility="hidden"/>
+              <ellipse id="mouth-o" cx="240" cy="308" rx="16" ry="20" fill="#5c2430" stroke="#3a2a12" stroke-width="5" visibility="hidden"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div class="dock">
+        <p id="model-status" class="model-status">正在准备手势模型…</p>
+        <div class="chips">
+          <button type="button" data-reaction="wave" data-key="1" aria-pressed="false">1 挥手</button>
+          <button type="button" data-reaction="jump" data-key="2" aria-pressed="false">2 比耶</button>
+          <button type="button" data-reaction="surprised" data-key="3" aria-pressed="false">3 握拳</button>
+          <button type="button" data-reaction="both" data-key="4" aria-pressed="false">4 张掌</button>
+        </div>
+        <p id="alert" class="alert" role="alert" hidden></p>
+      </div>
+    </div>
+    <aside class="cam-card" aria-label="摄像头">
+      <div class="cam-stage">
+        <video id="cam-video" playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" muted autoplay></video>
+        <canvas id="cam-canvas"></canvas>
+      </div>
+      <p id="cam-label" class="cam-label" aria-live="polite">摄像头未开启</p>
+      <button id="cam-button" type="button" class="primary">开启摄像头</button>
+    </aside>
+    <div id="hud"></div>
+    <script type="module" src="/src/scenes/milk-frog/main.ts"></script>
+  </body>
+</html>

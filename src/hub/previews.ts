@@ -152,4 +152,45 @@ export const previews: Record<string, PreviewDraw> = {
       ctx.fillRect(8 + i * (w / bars), h * 0.78 - bh, bw, bh);
     }
   },
+  'milk-frog': (ctx, time, w, h) => {
+    ctx.fillStyle = '#102418';
+    ctx.fillRect(0, 0, w, h);
+    const bob = Math.sin(time * 2.2) * 5;
+    const cx = w * 0.52;
+    const cy = h * 0.56 + bob;
+    ctx.fillStyle = '#2ea24e';
+    ctx.beginPath();
+    ctx.ellipse(cx, h * 0.84, w * 0.22, h * 0.055, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffd24a';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, w * 0.15, h * 0.22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fff3d4';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + h * 0.04, w * 0.08, h * 0.11, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fffdf8';
+    ctx.beginPath();
+    ctx.arc(cx - w * 0.055, cy - h * 0.07, 16, 0, Math.PI * 2);
+    ctx.arc(cx + w * 0.055, cy - h * 0.07, 16, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#24180f';
+    ctx.beginPath();
+    ctx.arc(cx - w * 0.04, cy - h * 0.05, 6, 0, Math.PI * 2);
+    ctx.arc(cx + w * 0.07, cy - h * 0.05, 6, 0, Math.PI * 2);
+    ctx.fill();
+    const wave = Math.sin(time * 7);
+    ctx.strokeStyle = '#ffd24a';
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx + w * 0.12, cy);
+    ctx.quadraticCurveTo(cx + w * 0.2, cy - 20 - wave * 26, cx + w * 0.26, cy - 8 - wave * 36);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.12, cy);
+    ctx.quadraticCurveTo(cx - w * 0.2, cy + 10 + wave * 18, cx - w * 0.24, cy + 28);
+    ctx.stroke();
+  },
 };

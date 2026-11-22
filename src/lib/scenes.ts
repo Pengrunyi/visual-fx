@@ -116,6 +116,19 @@ export const scenes: readonly SceneInfo[] = [
     accent: '#ff4fd8',
     accent2: '#4d7cff',
   },
+  {
+    slug: 'milk-frog',
+    route: '/milk-frog/',
+    titleZh: '奶蛙手势互动',
+    titleEn: 'Milk Frog',
+    pageTitle: '奶蛙手势互动 · Milk Frog',
+    blurbZh: '挥手、比耶、握拳或按住张掌，奶蛙会回应。',
+    blurbEn: 'Wave, peace, fist, or a held open palm, and the frog reacts.',
+    description:
+      '摄像头识别挥手、剪刀手、握拳和按住的张开手掌，奶蛙会单臂挥手、跳跃或惊讶。也可按 1-4。',
+    accent: '#ffe14a',
+    accent2: '#fff3d2',
+  },
 ] as const;
 
 export function sceneBySlug(slug: string): SceneInfo | undefined {
