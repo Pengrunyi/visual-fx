@@ -193,4 +193,36 @@ export const previews: Record<string, PreviewDraw> = {
     ctx.quadraticCurveTo(cx - w * 0.2, cy + 10 + wave * 18, cx - w * 0.24, cy + 28);
     ctx.stroke();
   },
+  me: (ctx, time, w, h) => {
+    ctx.fillStyle = '#10141c';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.5, h * 0.9, w * 0.11, h * 0.035, 0, 0, Math.PI * 2);
+    ctx.fill();
+    const photo = mePortrait();
+    if (photo?.complete && photo.naturalWidth > 0) {
+      const bob = Math.sin(time * 2.1) * 3;
+      const ih = h * 0.98;
+      const iw = ih * (photo.naturalWidth / photo.naturalHeight);
+      ctx.drawImage(photo, (w - iw) / 2, h - ih + 6 + bob, iw, ih);
+      return;
+    }
+    ctx.fillStyle = '#1b1f28';
+    ctx.fillRect(w * 0.42, h * 0.28, w * 0.16, h * 0.62);
+    ctx.beginPath();
+    ctx.arc(w * 0.5, h * 0.22, h * 0.1, 0, Math.PI * 2);
+    ctx.fill();
+  },
 };
+
+let mePhoto: HTMLImageElement | undefined;
+
+function mePortrait(): HTMLImageElement | null {
+  if (typeof Image === 'undefined') return null;
+  if (!mePhoto) {
+    mePhoto = new Image();
+    mePhoto.src = `${import.meta.env.BASE_URL}me/person.webp`;
+  }
+  return mePhoto;
+}

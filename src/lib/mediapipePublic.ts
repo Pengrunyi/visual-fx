@@ -1,4 +1,4 @@
-/** Same-origin MediaPipe assets for the milk-frog page. No runtime CDN. */
+/** Same-origin MediaPipe assets shared by the milk-frog and /me/ pages. No runtime CDN. */
 export const MILK_FROG_WASM_FILES = [
   'vision_wasm_internal.js',
   'vision_wasm_internal.wasm',

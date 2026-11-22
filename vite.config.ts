@@ -102,6 +102,7 @@ export default defineConfig({
         snowGlobe: resolve(__dirname, 'snow-globe/index.html'),
         musicReactor: resolve(__dirname, 'music-reactor/index.html'),
         milkFrog: resolve(__dirname, 'milk-frog/index.html'),
+        me: resolve(__dirname, 'me/index.html'),
       },
     },
   },
