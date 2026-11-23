@@ -46,6 +46,10 @@ describe('bunny photo placement', () => {
     expect(main).toContain("folder: 'bunny'");
     expect(main).toContain("framing: 'half'");
     expect(main).toContain('mountGesturePortrait');
+    expect(main).toContain("theme: 'pastel'");
+    expect(readFileSync('src/scenes/me/main.ts', 'utf8')).not.toContain('pastel');
+    expect(readFileSync('src/scenes/bunny/bunny.css', 'utf8')).toContain('#fff6ee');
+    expect(readFileSync('src/scenes/me/me.css', 'utf8')).not.toContain('pastel-stage');
     expect(html).toContain('用手势，让它做个反应');
     expect(html).toContain('src="/src/scenes/bunny/main.ts"');
     expect(html).not.toMatch(/cdn\.|googleapis|jsdelivr|unpkg|esm\.sh/i);

@@ -26,6 +26,7 @@ export function mountGesturePortrait(options: {
   framing: PortraitFrame;
   pronounZh: string;
   pronounEn: string;
+  theme?: 'dark' | 'pastel';
 }): void {
   if (new URLSearchParams(location.search).get('pose') === 'still') {
     document.documentElement.dataset.pose = 'still';
@@ -300,9 +301,22 @@ function detect(now: number): void {
   }
 }
 
-  startLoop((_dt, time) => {
-    const now = time * 1000;
-    paintChips(view.frame(now));
-    detect(now);
-  });
+  const begin = (flare: ((reaction: string) => void) | null) => {
+    let shown = 'idle';
+    startLoop((_dt, time) => {
+      const now = time * 1000;
+      const current = view.frame(now);
+      paintChips(current);
+      if (current !== shown) {
+        flare?.(current);
+        shown = current;
+      }
+      detect(now);
+    });
+  };
+  if (options.theme === 'pastel') {
+    void import('../bunny/stage').then((mod) => begin(mod.mountPastelStage(person)));
+  } else {
+    begin(null);
+  }
 }
