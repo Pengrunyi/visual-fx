@@ -1,0 +1,28 @@
+{
+  "person": {
+    "width": 875,
+    "height": 1200
+  },
+  "head": {
+    "x": 132,
+    "y": 0,
+    "w": 587,
+    "h": 1000
+  },
+  "neck_pivot": {
+    "x": 333.69,
+    "y": 586.29
+  },
+  "source": {
+    "width": 1500,
+    "height": 2061,
+    "crop": {
+      "x": 0,
+      "y": 0,
+      "w": 1500,
+      "h": 2057
+    },
+    "scale": 0.583373845405931
+  },
+  "notes": "head (x,y,w,h) is where the top-left of head.png is placed on person.png. neck_pivot is the head rotation point in person.png coordinates (origin at top-left). Units are pixels."
+}
