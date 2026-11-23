@@ -6,6 +6,6 @@ mountGesturePortrait({
   slug: 'me',
   route: '/me/',
   framing: 'full',
-  pronounZh: '他',
-  pronounEn: 'he',
+  pronounZh: '她',
+  pronounEn: 'she',
 });

@@ -4,6 +4,9 @@ import { joinBase, scenes } from '../src/lib/scenes';
 import { SITE_BASE } from '../src/lib/site';
 
 const SLUGS = [
+  'bunny',
+  'me',
+  'milk-frog',
   'black-hole',
   'fluid',
   'galaxy',
@@ -12,15 +15,14 @@ const SLUGS = [
   'christmas',
   'snow-globe',
   'music-reactor',
-  'milk-frog',
-  'me',
-  'bunny',
 ];
 
 describe('scene registry', () => {
   it('lists eleven stable routes', () => {
     expect(scenes.map((scene) => scene.slug)).toEqual(SLUGS);
     expect(new Set(scenes.map((scene) => scene.route)).size).toBe(11);
+    expect(new Set(scenes.map((scene) => scene.titleZh)).size).toBe(11);
+    expect(new Set(scenes.map((scene) => scene.pageTitle)).size).toBe(11);
     scenes.forEach((scene) => {
       expect(scene.route).toBe(`/${scene.slug}/`);
       expect(scene.pageTitle.startsWith(scene.titleZh)).toBe(true);
