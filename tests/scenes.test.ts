@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { joinBase, scenes } from '../src/lib/scenes';
+import { freshSlugs, joinBase, scenes } from '../src/lib/scenes';
 import { SITE_BASE } from '../src/lib/site';
 
 const SLUGS = [
+  'attention',
   'bunny',
   'me',
   'milk-frog',
@@ -18,11 +19,19 @@ const SLUGS = [
 ];
 
 describe('scene registry', () => {
-  it('lists eleven stable routes', () => {
+  it('lists twelve stable routes', () => {
     expect(scenes.map((scene) => scene.slug)).toEqual(SLUGS);
-    expect(new Set(scenes.map((scene) => scene.route)).size).toBe(11);
-    expect(new Set(scenes.map((scene) => scene.titleZh)).size).toBe(11);
-    expect(new Set(scenes.map((scene) => scene.pageTitle)).size).toBe(11);
+    expect(scenes[0]).toMatchObject({
+      slug: 'attention',
+      route: '/attention/',
+      titleZh: '注意力实验室',
+      titleEn: 'Attention Lab',
+      pageTitle: '注意力实验室 · Attention Lab',
+    });
+    expect(freshSlugs.has('attention')).toBe(true);
+    expect(new Set(scenes.map((scene) => scene.route)).size).toBe(12);
+    expect(new Set(scenes.map((scene) => scene.titleZh)).size).toBe(12);
+    expect(new Set(scenes.map((scene) => scene.pageTitle)).size).toBe(12);
     scenes.forEach((scene) => {
       expect(scene.route).toBe(`/${scene.slug}/`);
       expect(scene.pageTitle.startsWith(scene.titleZh)).toBe(true);

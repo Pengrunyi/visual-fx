@@ -2,15 +2,13 @@ import '../styles/hub.css';
 import { previews } from './previews';
 import { chrome, getLang, setLang, type Lang } from '../lib/i18n';
 import { toast } from '../lib/loop';
-import { joinBase, scenes } from '../lib/scenes';
+import { freshSlugs, joinBase, scenes } from '../lib/scenes';
 import { copyText, pageUrl } from '../lib/url';
 
 const top = document.querySelector<HTMLElement>('#top');
 const grid = document.querySelector<HTMLElement>('#grid');
 const footer = document.querySelector<HTMLElement>('#footer-note');
 if (!top || !grid || !footer) throw new Error('missing hub nodes');
-
-const NEW_SLUGS = new Set(['bunny', 'me', 'milk-frog']);
 
 const cards = new Map<string, {
   title: HTMLElement;
@@ -59,7 +57,7 @@ function renderStatic() {
     preview.height = 270;
     preview.setAttribute('aria-hidden', 'true');
     let badge: HTMLElement | null = null;
-    if (NEW_SLUGS.has(scene.slug)) {
+    if (freshSlugs.has(scene.slug)) {
       badge = document.createElement('span');
       badge.className = 'badge';
     }

@@ -11,7 +11,23 @@ export interface SceneInfo {
   accent2: string;
 }
 
+/** Hub cards that wear the 新 / New badge. Attention leads the gallery. */
+export const freshSlugs: ReadonlySet<string> = new Set(['attention', 'bunny', 'me', 'milk-frog']);
+
 export const scenes: readonly SceneInfo[] = [
+  {
+    slug: 'attention',
+    route: '/attention/',
+    titleZh: '注意力实验室',
+    titleEn: 'Attention Lab',
+    pageTitle: '注意力实验室 · Attention Lab',
+    blurbZh: '点一个词，看缩放点积注意力把光投向谁。',
+    blurbEn: 'Tap a token and see where scaled dot-product attention shines.',
+    description:
+      '在浏览器里逐步演算缩放点积注意力：分词、Q、K、V、分数、Softmax 与多头加权混合，计算全程留在本地。',
+    accent: '#7af0ff',
+    accent2: '#ffb15a',
+  },
   {
     slug: 'bunny',
     route: '/bunny/',
