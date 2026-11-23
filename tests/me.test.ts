@@ -9,7 +9,7 @@ import {
   poseAt,
   stepCharacter,
   type CutoutLayout,
-} from '../src/scenes/me/personMotion';
+} from '../src/scenes/portrait/personMotion';
 
 const layout = JSON.parse(readFileSync('public/me/layout.json', 'utf8')) as CutoutLayout;
 
@@ -127,10 +127,13 @@ describe('real photo motion', () => {
 describe('me page reuses milk-frog assets', () => {
   it('points the page at the shared wasm directory and model', () => {
     const main = readFileSync('src/scenes/me/main.ts', 'utf8');
+    const shared = readFileSync('src/scenes/portrait/page.ts', 'utf8');
     const html = readFileSync('me/index.html', 'utf8');
-    expect(main).toContain('MILK_FROG_WASM_DIR');
-    expect(main).toContain('MILK_FROG_MODEL');
-    expect(main).toContain('cameraErrorMessage');
+    expect(main).toContain('mountGesturePortrait');
+    expect(main).toContain("folder: 'me'");
+    expect(shared).toContain('MILK_FROG_WASM_DIR');
+    expect(shared).toContain('MILK_FROG_MODEL');
+    expect(shared).toContain('cameraErrorMessage');
     expect(main).not.toContain('cdn.');
     expect(MILK_FROG_WASM_DIR).toBe('milk-frog/wasm');
     expect(MILK_FROG_MODEL).toBe('milk-frog/hand_landmarker.task');

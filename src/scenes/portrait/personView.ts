@@ -70,10 +70,23 @@ function paintLines(host: HTMLElement): void {
   });
 }
 
-export function createPersonView(root: HTMLElement, onError: (message: string) => void): {
+export type PortraitFrame = 'full' | 'half';
+
+const FRAME = {
+  full: { jump: 0.11, tilt: 1, sway: 1 },
+  half: { jump: 0.03, tilt: 0.5, sway: 0.6 },
+} as const;
+
+export function createPersonView(
+  root: HTMLElement,
+  options: { folder: string; framing: PortraitFrame; onError: (message: string) => void },
+): {
   trigger: (reaction: Reaction, holdMs?: number) => void;
   frame: (now: number) => ShownReaction;
 } {
+  const { folder, framing, onError } = options;
+  const frameScale = FRAME[framing];
+  root.dataset.frame = framing;
   const actor = must<HTMLElement>(root, '#actor');
   const rig = must<HTMLElement>(root, '#rig');
   const canvas = must<HTMLCanvasElement>(root, '#body-canvas');
@@ -103,6 +116,26 @@ export function createPersonView(root: HTMLElement, onError: (message: string) =
   let paintedRadius = -1;
   const dilatedMasks = new Map<number, Float32Array>();
   let lastJumpU = 0;
+
+  function layoutActor(): void {
+    if (framing !== 'half' || !layout) return;
+    const ratio = layout.person.width / layout.person.height;
+    const availW = root.clientWidth;
+    const availH = root.clientHeight;
+    if (availW <= 0 || availH <= 0) return;
+    let nextHeight = availH * 0.96;
+    let nextWidth = nextHeight * ratio;
+    if (nextWidth > availW) {
+      nextWidth = availW;
+      nextHeight = nextWidth / ratio;
+    }
+    actor.style.width = `${nextWidth}px`;
+    actor.style.height = `${nextHeight}px`;
+    actor.style.maxWidth = 'none';
+    actor.style.maxHeight = 'none';
+  }
+
+  window.addEventListener('resize', () => layoutActor());
 
   const trigger = (next: Reaction, holdMs = 1700) => {
     const now = performance.now();
@@ -178,11 +211,14 @@ export function createPersonView(root: HTMLElement, onError: (message: string) =
       stepCharacter(state, target, dt);
     }
     const height = actor.offsetHeight || 1;
-    const jumpPx = -state.jump * height * 0.11;
-    const bodyLift = state.headLift * height * 0.2;
-    actor.style.transform = `translate3d(${state.sway * 0.35}px, ${jumpPx + bodyLift}px, 0) scale(${state.scaleX}, ${state.scaleY})`;
-    rig.style.transform = `rotate(${state.sway}deg)`;
-    head.style.transform = `translate3d(0, ${state.headLift * height}px, 0) rotate(${state.headTilt}deg) rotateX(${state.headNod}deg)`;
+    const jumpPx = -state.jump * height * frameScale.jump;
+    const bodyLift = state.headLift * height * 0.2 * frameScale.tilt;
+    const sway = state.sway * frameScale.sway;
+    const tilt = state.headTilt * frameScale.tilt;
+    const nod = state.headNod * frameScale.tilt;
+    actor.style.transform = `translate3d(${sway * 0.35}px, ${jumpPx + bodyLift}px, 0) scale(${state.scaleX}, ${state.scaleY})`;
+    rig.style.transform = `rotate(${sway}deg)`;
+    head.style.transform = `translate3d(0, ${state.headLift * height * frameScale.tilt}px, 0) rotate(${tilt}deg) rotateX(${nod}deg)`;
     const shadowScale = Math.max(0.45, state.shadow * (1 - state.jump * 0.15));
     shadow.style.width = `${Math.max(48, actor.offsetWidth * 0.72)}px`;
     shadow.style.transform = `translateX(-50%) scale(${shadowScale}, ${0.75 + shadowScale * 0.25})`;
@@ -208,7 +244,7 @@ export function createPersonView(root: HTMLElement, onError: (message: string) =
     lines.style.transform = `translateX(${state.headTilt * 0.35}px)`;
 
     if (!still && layout && baseErase) {
-      const motion = Math.hypot(state.headTilt, state.headNod);
+      const motion = Math.hypot(tilt, nod);
       const strength = Math.min(1, Math.max(0, (motion - 2.3) / 1.4));
       const radius = strength <= 0 ? 0 : Math.min(5, Math.max(1, Math.round((motion - 2.3) * 1.15)));
       const signature = radius + Math.round(strength * 8) / 8;
@@ -238,9 +274,9 @@ export function createPersonView(root: HTMLElement, onError: (message: string) =
   void (async () => {
     try {
       const [layoutResponse, person, headImage] = await Promise.all([
-        fetch(`${base}me/layout.json`),
-        loadImage(`${base}me/person.webp`),
-        loadImage(`${base}me/head.png`),
+        fetch(`${base}${folder}/layout.json`),
+        loadImage(`${base}${folder}/person.webp`),
+        loadImage(`${base}${folder}/head.png`),
       ]);
       if (!layoutResponse.ok) throw new Error('layout');
       const parsed = await layoutResponse.json() as CutoutLayout;
@@ -248,6 +284,7 @@ export function createPersonView(root: HTMLElement, onError: (message: string) =
       layout = parsed;
       const box = headBox(parsed);
       actor.style.aspectRatio = `${parsed.person.width} / ${parsed.person.height}`;
+      layoutActor();
       head.src = headImage.src;
       head.style.left = `${box.left * 100}%`;
       head.style.top = `${box.top * 100}%`;

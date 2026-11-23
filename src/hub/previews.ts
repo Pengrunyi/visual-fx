@@ -200,7 +200,7 @@ export const previews: Record<string, PreviewDraw> = {
     ctx.beginPath();
     ctx.ellipse(w * 0.5, h * 0.9, w * 0.11, h * 0.035, 0, 0, Math.PI * 2);
     ctx.fill();
-    const photo = mePortrait();
+    const photo = portrait('me');
     if (photo?.complete && photo.naturalWidth > 0) {
       const bob = Math.sin(time * 2.1) * 3;
       const ih = h * 0.98;
@@ -214,15 +214,38 @@ export const previews: Record<string, PreviewDraw> = {
     ctx.arc(w * 0.5, h * 0.22, h * 0.1, 0, Math.PI * 2);
     ctx.fill();
   },
+  bunny: (ctx, time, w, h) => {
+    ctx.fillStyle = '#16141c';
+    ctx.fillRect(0, 0, w, h);
+    const photo = portrait('bunny');
+    if (photo?.complete && photo.naturalWidth > 0) {
+      const bob = Math.sin(time * 2.1) * 2;
+      const iw = w * 0.72;
+      const ih = iw * (photo.naturalHeight / photo.naturalWidth);
+      ctx.drawImage(photo, (w - iw) / 2, h - ih + bob, iw, ih);
+      return;
+    }
+    ctx.fillStyle = '#d7c4ea';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.5, h * 0.22, 18, 28, -0.4, 0, Math.PI * 2);
+    ctx.ellipse(w * 0.62, h * 0.2, 18, 28, 0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f3d7e6';
+    ctx.beginPath();
+    ctx.arc(w * 0.55, h * 0.42, 28, 0, Math.PI * 2);
+    ctx.fill();
+  },
 };
 
-let mePhoto: HTMLImageElement | undefined;
+const portraits = new Map<string, HTMLImageElement>();
 
-function mePortrait(): HTMLImageElement | null {
+function portrait(folder: string): HTMLImageElement | null {
   if (typeof Image === 'undefined') return null;
-  if (!mePhoto) {
-    mePhoto = new Image();
-    mePhoto.src = `${import.meta.env.BASE_URL}me/person.webp`;
+  let photo = portraits.get(folder);
+  if (!photo) {
+    photo = new Image();
+    photo.src = `${import.meta.env.BASE_URL}${folder}/person.webp`;
+    portraits.set(folder, photo);
   }
-  return mePhoto;
+  return photo;
 }

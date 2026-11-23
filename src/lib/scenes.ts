@@ -142,6 +142,19 @@ export const scenes: readonly SceneInfo[] = [
     accent: '#d5deee',
     accent2: '#7f9bb8',
   },
+  {
+    slug: 'bunny',
+    route: '/bunny/',
+    titleZh: '手势互动',
+    titleEn: 'Bunny Gesture',
+    pageTitle: '手势互动 · 真人版',
+    blurbZh: '半身兔耳装：挥手、比耶、握拳或按住张掌，她会回应。',
+    blurbEn: 'A waist-up bunny portrait that waves, jumps, or startles.',
+    description:
+      '摄像头识别挥手、剪刀手、握拳和按住的张开手掌，兔耳装会挥手、跳跃或惊讶。也可按 1-4。',
+    accent: '#e4d4f5',
+    accent2: '#f6d5e4',
+  },
 ] as const;
 
 export function sceneBySlug(slug: string): SceneInfo | undefined {
