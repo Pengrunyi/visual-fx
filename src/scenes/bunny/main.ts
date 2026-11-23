@@ -8,4 +8,5 @@ mountGesturePortrait({
   framing: 'half',
   pronounZh: '她',
   pronounEn: 'she',
+  theme: 'pastel',
 });
