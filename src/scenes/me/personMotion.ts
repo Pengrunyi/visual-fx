@@ -30,25 +30,21 @@ export function headBox(layout: CutoutLayout): {
 
 /**
  * How much of the body photo to punch out under the head layer.
- * Solid face pixels go away so a turn does not leave a second face.
- * The collar at the neck pivot stays, and soft edge pixels stay so the
- * overlay still meets the jacket without a dark seam at rest.
- * `x` and `y` are pixels inside the head image.
+ * Solid face pixels above the neck go away so a turn does not leave a second face.
+ * The fade ends just below the pivot, so long hair and the coat under it stay on
+ * the body instead of leaving holes when the head rotates.
+ * `y` is the row inside the head image. The horizontal arguments stay in the
+ * signature so callers can pass the neck point as a pair.
  */
-export function eraseWeight(alpha: number, x: number, y: number, pivotX: number, pivotY: number): number {
+export function eraseWeight(alpha: number, _x: number, y: number, _pivotX: number, pivotY: number): number {
   const t = clamp01((alpha - 0.72) / 0.24);
   const solid = t * t * (3 - 2 * t);
-  const fadeStart = pivotY - 22;
-  const fadeEnd = pivotY + 4;
-  let keep = 1;
-  if (y > fadeStart) {
-    const along = clamp01((fadeEnd - y) / (fadeEnd - fadeStart));
-    const vertical = along * along * (3 - 2 * along);
-    const side = clamp01(Math.abs(x - pivotX) / 34);
-    const lateral = side * side * (3 - 2 * side);
-    keep = vertical + (1 - vertical) * lateral;
-  }
-  return solid * keep;
+  const fadeStart = pivotY - 28;
+  const fadeEnd = pivotY + 6;
+  if (y <= fadeStart) return solid;
+  const along = clamp01((fadeEnd - y) / (fadeEnd - fadeStart));
+  const vertical = along * along * (3 - 2 * along);
+  return solid * vertical;
 }
 
 export interface PoseFrame {

@@ -13,26 +13,51 @@ import {
 
 const layout = JSON.parse(readFileSync('public/me/layout.json', 'utf8')) as CutoutLayout;
 
+function imageSize(path: string): { width: number; height: number } {
+  const buf = readFileSync(path);
+  if (buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP' && buf.toString('ascii', 12, 16) === 'VP8X') {
+    return { width: 1 + buf.readUIntLE(24, 3), height: 1 + buf.readUIntLE(27, 3) };
+  }
+  if (buf[0] === 0x89 && buf.toString('ascii', 1, 4) === 'PNG' && buf.toString('ascii', 12, 16) === 'IHDR') {
+    return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+  }
+  throw new Error(`unsupported image ${path}`);
+}
+
 describe('real photo placement', () => {
   it('pins the head cutout on the neck pivot from layout.json', () => {
+    const person = imageSize('public/me/person.webp');
+    const head = imageSize('public/me/head.png');
+    expect(person).toEqual(layout.person);
+    expect(head).toEqual({ width: layout.head.w, height: layout.head.h });
+    expect(layout.head.x).toBeGreaterThanOrEqual(0);
+    expect(layout.head.y).toBeGreaterThanOrEqual(0);
+    expect(layout.head.x + layout.head.w).toBeLessThanOrEqual(layout.person.width);
+    expect(layout.head.y + layout.head.h).toBeLessThanOrEqual(layout.person.height);
+    expect(layout.neck_pivot.x).toBeGreaterThan(layout.head.x);
+    expect(layout.neck_pivot.x).toBeLessThan(layout.head.x + layout.head.w);
+    expect(layout.neck_pivot.y).toBeGreaterThan(layout.head.y);
+    expect(layout.neck_pivot.y).toBeLessThan(layout.head.y + layout.head.h);
+
     const box = headBox(layout);
-    expect(layout.person).toEqual({ width: 499, height: 1200 });
-    expect(layout.head).toEqual({ x: 109, y: 4, w: 155, h: 241 });
-    expect(box.left).toBeCloseTo(109 / 499, 6);
-    expect(box.top).toBeCloseTo(4 / 1200, 6);
-    expect(box.width).toBeCloseTo(155 / 499, 6);
-    expect(box.height).toBeCloseTo(241 / 1200, 6);
-    expect(box.originX).toBeCloseTo((205.5 - 109) / 155, 6);
-    expect(box.originY).toBeCloseTo((225.44 - 4) / 241, 6);
+    expect(box.left).toBeCloseTo(layout.head.x / layout.person.width, 6);
+    expect(box.top).toBeCloseTo(layout.head.y / layout.person.height, 6);
+    expect(box.width).toBeCloseTo(layout.head.w / layout.person.width, 6);
+    expect(box.height).toBeCloseTo(layout.head.h / layout.person.height, 6);
+    expect(box.originX).toBeCloseTo((layout.neck_pivot.x - layout.head.x) / layout.head.w, 6);
+    expect(box.originY).toBeCloseTo((layout.neck_pivot.y - layout.head.y) / layout.head.h, 6);
+    expect(readFileSync('src/scenes/me/me.css', 'utf8')).toContain(
+      `aspect-ratio: ${layout.person.width} / ${layout.person.height}`,
+    );
   });
 
-  it('punches out the face and keeps the collar at the neck', () => {
+  it('erases the face above the neck and leaves the coat under the hair', () => {
     const pivotX = layout.neck_pivot.x - layout.head.x;
     const pivotY = layout.neck_pivot.y - layout.head.y;
-    expect(eraseWeight(1, 70, 40, pivotX, pivotY)).toBeGreaterThan(0.95);
-    expect(eraseWeight(0.2, 70, 40, pivotX, pivotY)).toBe(0);
+    expect(eraseWeight(1, pivotX, pivotY - 80, pivotX, pivotY)).toBeGreaterThan(0.95);
+    expect(eraseWeight(0.2, pivotX, pivotY - 80, pivotX, pivotY)).toBe(0);
     expect(eraseWeight(1, pivotX, pivotY, pivotX, pivotY)).toBeLessThan(0.25);
-    expect(eraseWeight(1, 12, pivotY - 6, pivotX, pivotY)).toBeGreaterThan(0.9);
+    expect(eraseWeight(1, 12, pivotY + 40, pivotX, pivotY)).toBe(0);
   });
 });
 
