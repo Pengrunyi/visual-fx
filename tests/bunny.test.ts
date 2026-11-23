@@ -50,7 +50,8 @@ describe('bunny photo placement', () => {
     expect(readFileSync('src/scenes/me/main.ts', 'utf8')).not.toContain('pastel');
     expect(readFileSync('src/scenes/bunny/bunny.css', 'utf8')).toContain('#fff6ee');
     expect(readFileSync('src/scenes/me/me.css', 'utf8')).not.toContain('pastel-stage');
-    expect(html).toContain('用手势，让它做个反应');
+    expect(html).toContain('用手势，让她做个反应');
+    expect(html).toContain('兔耳装手势互动 · Bunny Gesture');
     expect(html).toContain('src="/src/scenes/bunny/main.ts"');
     expect(html).not.toMatch(/cdn\.|googleapis|jsdelivr|unpkg|esm\.sh/i);
     const pivotY = layout.neck_pivot.y - layout.head.y;

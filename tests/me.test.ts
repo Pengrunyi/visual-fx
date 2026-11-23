@@ -141,7 +141,10 @@ describe('me page reuses milk-frog assets', () => {
     expect(existsSync('public/me/hand_landmarker.task')).toBe(false);
     expect(existsSync('public/me/person.webp')).toBe(true);
     expect(existsSync('public/me/head.png')).toBe(true);
-    expect(html).toContain('用手势，让它做个反应');
+    expect(main).toContain("pronounZh: '她'");
+    expect(main).toContain("pronounEn: 'she'");
+    expect(html).toContain('用手势，让她做个反应');
+    expect(html).toContain('真人手势互动 · Real Gesture');
     expect(html).toContain('1 挥手');
     expect(html).toContain('4 张掌');
     expect(html).toContain('开启摄像头');

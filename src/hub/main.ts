@@ -10,7 +10,15 @@ const grid = document.querySelector<HTMLElement>('#grid');
 const footer = document.querySelector<HTMLElement>('#footer-note');
 if (!top || !grid || !footer) throw new Error('missing hub nodes');
 
-const cards = new Map<string, { title: HTMLElement; blurb: HTMLElement; open: HTMLElement; copy: HTMLButtonElement }>();
+const NEW_SLUGS = new Set(['bunny', 'me', 'milk-frog']);
+
+const cards = new Map<string, {
+  title: HTMLElement;
+  blurb: HTMLElement;
+  open: HTMLElement;
+  copy: HTMLButtonElement;
+  badge: HTMLElement | null;
+}>();
 
 function text(lang: Lang) {
   return chrome[lang];
@@ -39,37 +47,47 @@ function renderStatic() {
 
   if (cards.size > 0) return;
   scenes.forEach((scene) => {
+    const href = joinBase(import.meta.env.BASE_URL, scene.route);
     const card = document.createElement('article');
     card.className = 'card';
     card.style.borderColor = `${scene.accent}55`;
+    const link = document.createElement('a');
+    link.className = 'card-link';
+    link.href = href;
     const preview = document.createElement('canvas');
     preview.width = 480;
     preview.height = 270;
+    preview.setAttribute('aria-hidden', 'true');
+    let badge: HTMLElement | null = null;
+    if (NEW_SLUGS.has(scene.slug)) {
+      badge = document.createElement('span');
+      badge.className = 'badge';
+    }
     const body = document.createElement('div');
     body.className = 'card-body';
     const title = document.createElement('h2');
     const blurb = document.createElement('p');
+    body.append(title, blurb);
+    if (badge) link.append(badge);
+    link.append(preview, body);
     const actions = document.createElement('div');
     actions.className = 'card-actions';
-    const openLink = document.createElement('a');
-    openLink.href = joinBase(import.meta.env.BASE_URL, scene.route);
-    const open = document.createElement('button');
-    open.type = 'button';
+    const open = document.createElement('span');
     open.className = 'primary';
-    openLink.append(open);
+    open.setAttribute('aria-hidden', 'true');
     const copy = document.createElement('button');
     copy.type = 'button';
+    copy.className = 'copy';
     copy.addEventListener('click', () => {
       const langNow = getLang();
       void copyText(pageUrl(scene.route)).then((ok) => {
         toast(ok ? chrome[langNow].copied : chrome[langNow].copyFail);
       });
     });
-    actions.append(openLink, copy);
-    body.append(title, blurb, actions);
-    card.append(preview, body);
+    actions.append(open, copy);
+    card.append(link, actions);
     grid!.append(card);
-    cards.set(scene.slug, { title, blurb, open, copy });
+    cards.set(scene.slug, { title, blurb, open, copy, badge });
     const context = preview.getContext('2d');
     if (context) contexts.push({ slug: scene.slug, ctx: context, canvas: preview });
   });
@@ -93,6 +111,7 @@ function refreshCards() {
     card.blurb.textContent = lang === 'zh' ? scene.blurbZh : scene.blurbEn;
     card.open.textContent = strings.open;
     card.copy.textContent = strings.copy;
+    if (card.badge) card.badge.textContent = lang === 'zh' ? '新' : 'New';
   });
 }
 

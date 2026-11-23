@@ -13,6 +13,45 @@ export interface SceneInfo {
 
 export const scenes: readonly SceneInfo[] = [
   {
+    slug: 'bunny',
+    route: '/bunny/',
+    titleZh: '兔耳装手势互动',
+    titleEn: 'Bunny Gesture',
+    pageTitle: '兔耳装手势互动 · Bunny Gesture',
+    blurbZh: '半身兔耳装：挥手、比耶、握拳或按住张掌，她会回应。',
+    blurbEn: 'A waist-up bunny portrait that waves, jumps, or startles.',
+    description:
+      '摄像头识别挥手、剪刀手、握拳和按住的张开手掌，兔耳装会挥手、跳跃或惊讶。也可按 1-4。',
+    accent: '#e4d4f5',
+    accent2: '#f6d5e4',
+  },
+  {
+    slug: 'me',
+    route: '/me/',
+    titleZh: '真人手势互动',
+    titleEn: 'Real Gesture',
+    pageTitle: '真人手势互动 · Real Gesture',
+    blurbZh: '挥手、比耶、握拳或按住张掌，她会回应。',
+    blurbEn: 'Wave, peace, fist, or a held open palm, and she reacts.',
+    description:
+      '摄像头识别挥手、剪刀手、握拳和按住的张开手掌，她会挥手、跳跃或惊讶。也可按 1-4。',
+    accent: '#d5deee',
+    accent2: '#7f9bb8',
+  },
+  {
+    slug: 'milk-frog',
+    route: '/milk-frog/',
+    titleZh: '奶蛙手势互动',
+    titleEn: 'Milk Frog',
+    pageTitle: '奶蛙手势互动 · Milk Frog',
+    blurbZh: '挥手、比耶、握拳或按住张掌，奶蛙会回应。',
+    blurbEn: 'Wave, peace, fist, or a held open palm, and the frog reacts.',
+    description:
+      '摄像头识别挥手、剪刀手、握拳和按住的张开手掌，奶蛙会单臂挥手、跳跃或惊讶。也可按 1-4。',
+    accent: '#ffe14a',
+    accent2: '#fff3d2',
+  },
+  {
     slug: 'black-hole',
     route: '/black-hole/',
     titleZh: '卡冈图雅黑洞',
@@ -115,45 +154,6 @@ export const scenes: readonly SceneInfo[] = [
       '实时 Web Audio 频谱分析。内置合成鼓点即可开演，也可载入本地音频或麦克风，在四种 GLSL 视觉间切换。',
     accent: '#ff4fd8',
     accent2: '#4d7cff',
-  },
-  {
-    slug: 'milk-frog',
-    route: '/milk-frog/',
-    titleZh: '奶蛙手势互动',
-    titleEn: 'Milk Frog',
-    pageTitle: '奶蛙手势互动 · Milk Frog',
-    blurbZh: '挥手、比耶、握拳或按住张掌，奶蛙会回应。',
-    blurbEn: 'Wave, peace, fist, or a held open palm, and the frog reacts.',
-    description:
-      '摄像头识别挥手、剪刀手、握拳和按住的张开手掌，奶蛙会单臂挥手、跳跃或惊讶。也可按 1-4。',
-    accent: '#ffe14a',
-    accent2: '#fff3d2',
-  },
-  {
-    slug: 'me',
-    route: '/me/',
-    titleZh: '手势互动',
-    titleEn: 'Real Gesture',
-    pageTitle: '手势互动 · 真人版',
-    blurbZh: '挥手、比耶、握拳或按住张掌，真人会回应。',
-    blurbEn: 'Wave, peace, fist, or a held open palm, and he reacts.',
-    description:
-      '摄像头识别挥手、剪刀手、握拳和按住的张开手掌，真人会挥手、跳跃或惊讶。也可按 1-4。',
-    accent: '#d5deee',
-    accent2: '#7f9bb8',
-  },
-  {
-    slug: 'bunny',
-    route: '/bunny/',
-    titleZh: '手势互动',
-    titleEn: 'Bunny Gesture',
-    pageTitle: '手势互动 · 真人版',
-    blurbZh: '半身兔耳装：挥手、比耶、握拳或按住张掌，她会回应。',
-    blurbEn: 'A waist-up bunny portrait that waves, jumps, or startles.',
-    description:
-      '摄像头识别挥手、剪刀手、握拳和按住的张开手掌，兔耳装会挥手、跳跃或惊讶。也可按 1-4。',
-    accent: '#e4d4f5',
-    accent2: '#f6d5e4',
   },
 ] as const;
 
