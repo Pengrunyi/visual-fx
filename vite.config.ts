@@ -103,6 +103,7 @@ export default defineConfig({
         musicReactor: resolve(__dirname, 'music-reactor/index.html'),
         milkFrog: resolve(__dirname, 'milk-frog/index.html'),
         me: resolve(__dirname, 'me/index.html'),
+        bunny: resolve(__dirname, 'bunny/index.html'),
       },
     },
   },

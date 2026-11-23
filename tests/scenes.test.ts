@@ -14,12 +14,13 @@ const SLUGS = [
   'music-reactor',
   'milk-frog',
   'me',
+  'bunny',
 ];
 
 describe('scene registry', () => {
-  it('lists ten stable routes', () => {
+  it('lists eleven stable routes', () => {
     expect(scenes.map((scene) => scene.slug)).toEqual(SLUGS);
-    expect(new Set(scenes.map((scene) => scene.route)).size).toBe(10);
+    expect(new Set(scenes.map((scene) => scene.route)).size).toBe(11);
     scenes.forEach((scene) => {
       expect(scene.route).toBe(`/${scene.slug}/`);
       expect(scene.pageTitle.startsWith(scene.titleZh)).toBe(true);

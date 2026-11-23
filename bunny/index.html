@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#10141c" />
+    <title>手势互动 · 真人版</title>
+    <meta name="description" content="摄像头识别挥手、剪刀手、握拳和按住的张开手掌，兔耳装会挥手、跳跃或惊讶。也可按 1-4。" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+  </head>
+  <body class="me bunny">
+    <div class="page">
+      <header>
+        <h1>用手势，让它做个反应</h1>
+        <p class="sub">手势互动 · 真人版</p>
+      </header>
+      <div class="person-wrap">
+        <div id="person" class="person" data-reaction="idle" data-frame="half" role="img" aria-label="兔耳装半身照片，头部会随动作转动">
+          <div id="shadow" class="shadow"></div>
+          <div id="actor" class="actor">
+            <div id="rig" class="rig">
+              <div class="breathe">
+                <canvas id="body-canvas" class="body"></canvas>
+                <img id="head" class="head" alt="" draggable="false" />
+              </div>
+              <div id="wave-hand" class="emoji wave" aria-hidden="true">👋</div>
+              <div id="both-left" class="emoji both-left" aria-hidden="true">👋</div>
+              <div id="both-right" class="emoji both-right" aria-hidden="true">👋</div>
+              <div id="peace-pop" class="emoji peace" aria-hidden="true">✌️</div>
+              <div id="wow-pop" class="emoji wow" aria-hidden="true">😮</div>
+              <div id="bang-pop" class="emoji bang" aria-hidden="true">❗</div>
+              <div id="lines" class="lines" aria-hidden="true"></div>
+              <div id="bits" class="bits" aria-hidden="true"></div>
+            </div>
+          </div>
+          <div class="stage-fade" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="dock">
+        <p id="model-status" class="model-status">正在准备手势模型…</p>
+        <div class="chips">
+          <button type="button" data-reaction="wave" data-key="1" aria-pressed="false">1 挥手</button>
+          <button type="button" data-reaction="jump" data-key="2" aria-pressed="false">2 比耶</button>
+          <button type="button" data-reaction="surprised" data-key="3" aria-pressed="false">3 握拳</button>
+          <button type="button" data-reaction="both" data-key="4" aria-pressed="false">4 张掌</button>
+        </div>
+        <p id="alert" class="alert" role="alert" hidden></p>
+      </div>
+    </div>
+    <aside class="cam-card" aria-label="摄像头">
+      <div class="cam-stage">
+        <video id="cam-video" playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" muted autoplay></video>
+        <canvas id="cam-canvas"></canvas>
+      </div>
+      <p id="cam-label" class="cam-label" aria-live="polite">摄像头未开启</p>
+      <button id="cam-button" type="button" class="primary">开启摄像头</button>
+    </aside>
+    <div id="hud"></div>
+    <script type="module" src="/src/scenes/bunny/main.ts"></script>
+  </body>
+</html>
