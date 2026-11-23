@@ -74,7 +74,7 @@ body.me {
   z-index: 1;
   height: min(86%, 860px);
   width: auto;
-  aspect-ratio: 499 / 1200;
+  aspect-ratio: 513 / 1200;
   max-width: 100%;
   transform-origin: 50% 100%;
 }
@@ -108,7 +108,7 @@ body.me {
 
 .head {
   z-index: 2;
-  transform-origin: 62.26% 91.88%;
+  transform-origin: 62.687% 69.472%;
 }
 
 .emoji {
