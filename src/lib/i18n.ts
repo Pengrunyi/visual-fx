@@ -21,7 +21,7 @@ export function setLang(lang: Lang): void {
 export const chrome = {
   zh: {
     collection: '视觉特效合集',
-    tagline: '十一个零外链的互动视觉场景，可在微信里直接全屏打开。',
+    tagline: '十二个零外链的互动视觉场景，可在微信里直接全屏打开。',
     open: '打开场景',
     copy: '复制直达链接',
     copied: '链接已复制',
@@ -35,7 +35,7 @@ export const chrome = {
   },
   en: {
     collection: 'Visual FX',
-    tagline: 'Eleven self-contained visual scenes that open fullscreen in WeChat.',
+    tagline: 'Twelve self-contained visual scenes that open fullscreen in WeChat.',
     open: 'Open scene',
     copy: 'Copy direct link',
     copied: 'Link copied',

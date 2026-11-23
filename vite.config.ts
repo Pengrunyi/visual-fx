@@ -93,6 +93,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
+        attention: resolve(__dirname, 'attention/index.html'),
         blackHole: resolve(__dirname, 'black-hole/index.html'),
         fluid: resolve(__dirname, 'fluid/index.html'),
         galaxy: resolve(__dirname, 'galaxy/index.html'),

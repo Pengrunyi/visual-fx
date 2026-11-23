@@ -1,6 +1,51 @@
 export type PreviewDraw = (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => void;
 
 export const previews: Record<string, PreviewDraw> = {
+  attention: (ctx, time, w, h) => {
+    ctx.fillStyle = '#070b14';
+    ctx.fillRect(0, 0, w, h);
+    const n = 6;
+    const orbs = Array.from({ length: n }, (_, i) => {
+      const t = i / (n - 1);
+      return {
+        x: w * (0.14 + t * 0.72),
+        y: h * 0.58 - Math.sin(t * Math.PI) * h * 0.16 + Math.sin(time * 1.4 + i) * 3,
+      };
+    });
+    const query = orbs[1];
+    const colors = ['#7af0ff', '#ffb15a', '#ff6b9a', '#c4b5fd'];
+    ctx.globalCompositeOperation = 'lighter';
+    orbs.forEach((orb, index) => {
+      if (index === 1) return;
+      const weight = index === 4 ? 0.72 : index === 0 || index === 2 ? 0.38 : 0.12;
+      colors.forEach((color, head) => {
+        const bend = 18 + head * 10 + weight * 16;
+        ctx.strokeStyle = color;
+        ctx.globalAlpha = 0.18 + weight * (head === index % 4 ? 0.7 : 0.15);
+        ctx.lineWidth = 1 + weight * (head === index % 4 ? 5 : 1.5);
+        ctx.beginPath();
+        ctx.moveTo(query.x, query.y);
+        ctx.quadraticCurveTo((query.x + orb.x) / 2, Math.min(query.y, orb.y) - bend, orb.x, orb.y);
+        ctx.stroke();
+      });
+    });
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    orbs.forEach((orb, index) => {
+      const radius = index === 1 ? 9 : 6;
+      const glow = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, radius * 2.4);
+      glow.addColorStop(0, 'rgba(255,255,255,0.95)');
+      glow.addColorStop(1, 'rgba(122,240,255,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(orb.x, orb.y, radius * 2.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = index === 1 ? '#e9fbff' : '#c5d4ea';
+      ctx.beginPath();
+      ctx.arc(orb.x, orb.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  },
   'black-hole': (ctx, time, w, h) => {
     ctx.fillStyle = '#05040a';
     ctx.fillRect(0, 0, w, h);
