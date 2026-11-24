@@ -4,6 +4,7 @@ import { freshSlugs, joinBase, scenes } from '../src/lib/scenes';
 import { SITE_BASE } from '../src/lib/site';
 
 const SLUGS = [
+  'christmas',
   'attention',
   'bunny',
   'me',
@@ -13,7 +14,6 @@ const SLUGS = [
   'galaxy',
   'aurora',
   'fireworks',
-  'christmas',
   'snow-globe',
   'music-reactor',
 ];
@@ -22,13 +22,22 @@ describe('scene registry', () => {
   it('lists twelve stable routes', () => {
     expect(scenes.map((scene) => scene.slug)).toEqual(SLUGS);
     expect(scenes[0]).toMatchObject({
-      slug: 'attention',
+      slug: 'christmas',
+      route: '/christmas/',
+      titleZh: '圣诞手势粒子',
+      titleEn: 'Christmas Gestures',
+      pageTitle: '圣诞手势粒子 · Christmas Gestures',
+    });
+    expect(freshSlugs.has('christmas')).toBe(true);
+    expect(freshSlugs.has('attention')).toBe(true);
+    expect(scenes.find((scene) => scene.slug === 'attention')).toMatchObject({
       route: '/attention/',
       titleZh: '注意力实验室',
       titleEn: 'Attention Lab',
-      pageTitle: '注意力实验室 · Attention Lab',
     });
-    expect(freshSlugs.has('attention')).toBe(true);
+    expect(scenes.find((scene) => scene.slug === 'me')?.titleZh).toBe('真人手势互动');
+    expect(scenes.find((scene) => scene.slug === 'bunny')?.titleZh).toBe('兔耳装手势互动');
+    expect(scenes.find((scene) => scene.slug === 'milk-frog')?.titleZh).toBe('奶蛙手势互动');
     expect(new Set(scenes.map((scene) => scene.route)).size).toBe(12);
     expect(new Set(scenes.map((scene) => scene.titleZh)).size).toBe(12);
     expect(new Set(scenes.map((scene) => scene.pageTitle)).size).toBe(12);

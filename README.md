@@ -10,22 +10,22 @@ Mobile-first visual scenes with **zero external network dependencies**. Built fo
 
 <table>
   <tr>
+    <td align="center"><a href="https://pengrunyi.github.io/visual-fx/christmas/"><img src="docs/screenshots/christmas.jpg" alt="圣诞手势粒子 · Christmas Gestures" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/christmas/">圣诞手势粒子</a></td>
     <td align="center"><a href="https://pengrunyi.github.io/visual-fx/attention/"><img src="docs/screenshots/attention.jpg" alt="注意力实验室 · Attention Lab" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/attention/">注意力实验室</a></td>
     <td align="center"><a href="https://pengrunyi.github.io/visual-fx/bunny/"><img src="docs/screenshots/bunny.jpg" alt="兔耳装手势互动 · Bunny Gesture" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/bunny/">兔耳装手势互动</a></td>
-    <td align="center"><a href="https://pengrunyi.github.io/visual-fx/me/"><img src="docs/screenshots/me.jpg" alt="真人手势互动 · Real Gesture" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/me/">真人手势互动</a></td>
   </tr>
   <tr>
+    <td align="center"><a href="https://pengrunyi.github.io/visual-fx/me/"><img src="docs/screenshots/me.jpg" alt="真人手势互动 · Real Gesture" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/me/">真人手势互动</a></td>
     <td align="center"><a href="https://pengrunyi.github.io/visual-fx/milk-frog/"><img src="docs/screenshots/milk-frog.jpg" alt="奶蛙手势互动 · Milk Frog" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/milk-frog/">奶蛙手势互动</a></td>
     <td align="center"><a href="https://pengrunyi.github.io/visual-fx/black-hole/"><img src="docs/screenshots/black-hole.jpg" alt="卡冈图雅黑洞 · Gargantua" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/black-hole/">卡冈图雅黑洞</a></td>
-    <td align="center"><a href="https://pengrunyi.github.io/visual-fx/fluid/"><img src="docs/screenshots/fluid.jpg" alt="霓虹流体动力学 · Neon Fluid" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/fluid/">霓虹流体动力学</a></td>
   </tr>
   <tr>
+    <td align="center"><a href="https://pengrunyi.github.io/visual-fx/fluid/"><img src="docs/screenshots/fluid.jpg" alt="霓虹流体动力学 · Neon Fluid" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/fluid/">霓虹流体动力学</a></td>
     <td align="center"><a href="https://pengrunyi.github.io/visual-fx/galaxy/"><img src="docs/screenshots/galaxy.jpg" alt="深空粒子星系 · Argon Galaxy" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/galaxy/">深空粒子星系</a></td>
     <td align="center"><a href="https://pengrunyi.github.io/visual-fx/aurora/"><img src="docs/screenshots/aurora.jpg" alt="极光雪夜 · GLSL Aurora" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/aurora/">极光雪夜</a></td>
-    <td align="center"><a href="https://pengrunyi.github.io/visual-fx/fireworks/"><img src="docs/screenshots/fireworks.jpg" alt="夜空物理烟花 · Firework Show" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/fireworks/">夜空物理烟花</a></td>
   </tr>
   <tr>
-    <td align="center"><a href="https://pengrunyi.github.io/visual-fx/christmas/"><img src="docs/screenshots/christmas.jpg" alt="星光粒子圣诞树 · Starlight Christmas" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/christmas/">星光粒子圣诞树</a></td>
+    <td align="center"><a href="https://pengrunyi.github.io/visual-fx/fireworks/"><img src="docs/screenshots/fireworks.jpg" alt="夜空物理烟花 · Firework Show" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/fireworks/">夜空物理烟花</a></td>
     <td align="center"><a href="https://pengrunyi.github.io/visual-fx/snow-globe/"><img src="docs/screenshots/snow-globe.jpg" alt="3D 水晶球音乐盒 · Winter Snow Globe" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/snow-globe/">3D 水晶球音乐盒</a></td>
     <td align="center"><a href="https://pengrunyi.github.io/visual-fx/music-reactor/"><img src="docs/screenshots/music-reactor.jpg" alt="音画频谱星环 · Audio Shader Lab" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/music-reactor/">音画频谱星环</a></td>
   </tr>
@@ -36,6 +36,7 @@ Mobile-first visual scenes with **zero external network dependencies**. Built fo
 | Path | Scene |
 | --- | --- |
 | `/` | Gallery hub · 合集首页 |
+| `/christmas/` | 圣诞手势粒子 · Christmas Gestures |
 | `/attention/` | 注意力实验室 · Attention Lab |
 | `/bunny/` | 兔耳装手势互动 · Bunny Gesture |
 | `/me/` | 真人手势互动 · Real Gesture |
@@ -45,13 +46,14 @@ Mobile-first visual scenes with **zero external network dependencies**. Built fo
 | `/galaxy/` | 深空粒子星系 · Argon Galaxy |
 | `/aurora/` | 极光雪夜 · GLSL Aurora |
 | `/fireworks/` | 夜空物理烟花 · Firework Show |
-| `/christmas/` | 星光粒子圣诞树 · Starlight Christmas |
 | `/snow-globe/` | 3D 水晶球音乐盒 · Winter Snow Globe |
 | `/music-reactor/` | 音画频谱星环 · Audio Shader Lab |
 
-Christmas cards accept `?to=朋友&msg=圣诞快乐&from=署名`. The in-page editor copies a personalized link.
+`/christmas/`（圣诞手势粒子）打开时是一棵暖金色的粒子圣诞树，带星、彩灯、装饰球和 MERRY CHRISTMAS。握拳让光点汇回圣诞树，张开手掌让树炸成闪烁光点，OK 手势在光点里弹出橙色相框。三种状态也可以用按钮、触摸或键盘 `1` `2` `3` 切换，不开启摄像头也能看。识别结果会先稳定几帧：握拳和张掌需要更多一致帧，OK 票数更少、也能更快打断，避免捏合被当成张掌。
 
-圣诞场景支持贺卡参数，页内可填写收礼人、祝福和署名并复制微信链接。
+摄像头要点「开启摄像头」才会请求权限，失败时有中文说明。上传的人像或宠物照片只用 `URL.createObjectURL` 留在本地，不上传照片，也不上传摄像头画面。没有上传时显示标了「示例」的插画卡片。页面复用奶蛙同一份本地 MediaPipe wasm 和 `hand_landmarker.task`，不访问外部 CDN。窄屏和 `prefers-reduced-motion` 会降低像素比与粒子数量，减少动态时直接切到目标状态。
+
+The Christmas scene starts as a warm gold particle tree. A fist rebuilds it, an open palm bursts it into sparks, and OK raises orange photo frames. Keys 1–3 and the on-screen buttons do the same without a camera. Uploaded portraits stay in local object URLs. The hand model is the same on-device MediaPipe package used by Milk Frog.
 
 `/attention/`（注意力实验室）在浏览器里演算缩放点积注意力，不下载模型，也不访问网络。中文按字切开，英文按单词切开，标点单独成 token。四个手写的头分工不同：邻近看位置的正弦余弦，同形看相同的字，标点让内容词看向标点，句首让每个词看向第一个词。打开就能点词、换头、播放，或一步步看 Q、K、V、点积、除以 √d_k、Softmax 和加权混合。投影是教学用的，不是训练出来的；计算公式与 Transformer 的缩放点积注意力相同，输出矩阵 W_O 取单位映射。
 

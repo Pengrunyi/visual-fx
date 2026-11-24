@@ -11,10 +11,23 @@ export interface SceneInfo {
   accent2: string;
 }
 
-/** Hub cards that wear the 新 / New badge. Attention leads the gallery. */
-export const freshSlugs: ReadonlySet<string> = new Set(['attention', 'bunny', 'me', 'milk-frog']);
+/** Hub cards that wear the 新 / New badge. Christmas leads the gallery. */
+export const freshSlugs: ReadonlySet<string> = new Set(['christmas', 'attention', 'bunny', 'me', 'milk-frog']);
 
 export const scenes: readonly SceneInfo[] = [
+  {
+    slug: 'christmas',
+    route: '/christmas/',
+    titleZh: '圣诞手势粒子',
+    titleEn: 'Christmas Gestures',
+    pageTitle: '圣诞手势粒子 · Christmas Gestures',
+    blurbZh: '握拳成树，张掌化光，OK 弹出橙色相框。',
+    blurbEn: 'A fist builds the tree, an open palm bursts it, OK reveals photos.',
+    description:
+      '金色粒子圣诞树随手势变化：握拳聚合成树，张开手掌炸成闪烁光点，OK 手势弹出橙色相框。照片与摄像头只在本地处理。',
+    accent: '#f0c36a',
+    accent2: '#ff7a18',
+  },
   {
     slug: 'attention',
     route: '/attention/',
@@ -131,19 +144,6 @@ export const scenes: readonly SceneInfo[] = [
       '多级 Canvas 物理烟花，加色拖尾与合成升空哨音、爆裂低音。点击夜空即可发射，也可自动表演。',
     accent: '#ffd36a',
     accent2: '#ff4d6d',
-  },
-  {
-    slug: 'christmas',
-    route: '/christmas/',
-    titleZh: '星光粒子圣诞树',
-    titleEn: 'Starlight Christmas',
-    pageTitle: '星光粒子圣诞树 · Starlight Christmas',
-    blurbZh: '粒子圣诞树、贺卡链接、音乐盒与圣诞老人。',
-    blurbEn: 'A particle tree, greeting links, a music box, and Santa.',
-    description:
-      '可交互星光粒子圣诞树，形态可变为祝福文字。支持 ?to=&msg=&from= 贺卡参数，并复制微信直达链接。',
-    accent: '#ff5a6a',
-    accent2: '#7dffb3',
   },
   {
     slug: 'snow-globe',
