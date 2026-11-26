@@ -10,7 +10,7 @@ Mobile-first visual scenes with **zero external network dependencies**. Built fo
 
 <table>
   <tr>
-    <td align="center"><a href="https://pengrunyi.github.io/visual-fx/christmas/"><img src="docs/screenshots/christmas.jpg" alt="圣诞手势粒子 · Christmas Gestures" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/christmas/">圣诞手势粒子</a></td>
+    <td align="center"><a href="https://pengrunyi.github.io/visual-fx/christmas/"><img src="docs/screenshots/christmas.jpg" alt="星座织树 · Constellation Tree" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/christmas/">星座织树</a></td>
     <td align="center"><a href="https://pengrunyi.github.io/visual-fx/attention/"><img src="docs/screenshots/attention.jpg" alt="注意力实验室 · Attention Lab" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/attention/">注意力实验室</a></td>
     <td align="center"><a href="https://pengrunyi.github.io/visual-fx/bunny/"><img src="docs/screenshots/bunny.jpg" alt="兔耳装手势互动 · Bunny Gesture" width="240"></a><br><a href="https://pengrunyi.github.io/visual-fx/bunny/">兔耳装手势互动</a></td>
   </tr>
@@ -36,7 +36,7 @@ Mobile-first visual scenes with **zero external network dependencies**. Built fo
 | Path | Scene |
 | --- | --- |
 | `/` | Gallery hub · 合集首页 |
-| `/christmas/` | 圣诞手势粒子 · Christmas Gestures |
+| `/christmas/` | 星座织树 · Constellation Tree |
 | `/attention/` | 注意力实验室 · Attention Lab |
 | `/bunny/` | 兔耳装手势互动 · Bunny Gesture |
 | `/me/` | 真人手势互动 · Real Gesture |
@@ -49,11 +49,11 @@ Mobile-first visual scenes with **zero external network dependencies**. Built fo
 | `/snow-globe/` | 3D 水晶球音乐盒 · Winter Snow Globe |
 | `/music-reactor/` | 音画频谱星环 · Audio Shader Lab |
 
-`/christmas/`（圣诞手势粒子）打开时是一棵暖金色的粒子圣诞树，带星、彩灯、装饰球和 MERRY CHRISTMAS。握拳让光点汇回圣诞树，张开手掌让树炸成闪烁光点，OK 手势在光点里弹出橙色相框。三种状态也可以用按钮、触摸或键盘 `1` `2` `3` 切换，不开启摄像头也能看。识别结果会先稳定几帧：握拳和张掌需要更多一致帧，OK 票数更少、也能更快打断，避免捏合被当成张掌。
+`/christmas/`（星座织树）是夜空里的一棵星座圣诞树：细银线和少量暖金线把星星连成树的轮廓，树顶有一颗亮星，画面上写着 MERRY CHRISTMAS。握拳让星线收紧，树保持完成的样子；张开手掌时线条变柔，并落下细雪，不是炸开的粒子。OK 手势把橙色相框挂在枝头。拇指和食指捏合，或点「钉一颗星」，会在树上再钉一颗星。摄像头开启后，五指指尖是活的星，移动时会牵出星线。三种主状态也可以用按钮、触摸或键盘 `1` `2` `3` 切换。识别会先稳定几帧，OK 比握拳和张掌更容易成立，避免捏合的圆被看成张开的手掌。
 
-摄像头要点「开启摄像头」才会请求权限，失败时有中文说明。上传的人像或宠物照片只用 `URL.createObjectURL` 留在本地，不上传照片，也不上传摄像头画面。没有上传时显示标了「示例」的插画卡片。页面复用奶蛙同一份本地 MediaPipe wasm 和 `hand_landmarker.task`，不访问外部 CDN。窄屏和 `prefers-reduced-motion` 会降低像素比与粒子数量，减少动态时直接切到目标状态。
+摄像头要点「开启摄像头」才会请求权限，失败时有中文说明。上传的人像或宠物照片只用 `URL.createObjectURL` 留在本地，不上传照片，也不上传摄像头画面。没有上传时显示标了「示例」的插画卡片。页面复用奶蛙同一份本地 MediaPipe wasm 和 `hand_landmarker.task`，不访问外部 CDN。窄屏和 `prefers-reduced-motion` 会降低像素比，并减少背景星和雪花，减少动态时直接切到目标状态。
 
-The Christmas scene starts as a warm gold particle tree. A fist rebuilds it, an open palm bursts it into sparks, and OK raises orange photo frames. Keys 1–3 and the on-screen buttons do the same without a camera. Uploaded portraits stay in local object URLs. The hand model is the same on-device MediaPipe package used by Milk Frog.
+Constellation Tree is a Christmas tree drawn as a star map on a deep night sky. A fist holds the finished figure, an open palm softens the lines and starts fine snow, and OK hangs orange photo frames on the branches. Keys 1–3 and the buttons do the same without a camera. Uploaded portraits stay in local object URLs. The hand model is the same on-device MediaPipe package used by Milk Frog.
 
 `/attention/`（注意力实验室）在浏览器里演算缩放点积注意力，不下载模型，也不访问网络。中文按字切开，英文按单词切开，标点单独成 token。四个手写的头分工不同：邻近看位置的正弦余弦，同形看相同的字，标点让内容词看向标点，句首让每个词看向第一个词。打开就能点词、换头、播放，或一步步看 Q、K、V、点积、除以 √d_k、Softmax 和加权混合。投影是教学用的，不是训练出来的；计算公式与 Transformer 的缩放点积注意力相同，输出矩阵 W_O 取单位映射。
 

@@ -3,37 +3,40 @@ export interface Point {
   y: number;
 }
 
-/** Fist rebuilds the tree, an open palm bursts it, and OK raises the photos. */
-export type HandPose = 'fist' | 'open' | 'ok' | 'none';
-export type SceneMode = 'tree' | 'burst' | 'photos';
+/** Fist finishes the tree, an open palm brings snow, OK hangs photos, and a pinch pins a star. */
+export type HandPose = 'fist' | 'open' | 'ok' | 'pinch' | 'none';
+export type SceneMode = 'tree' | 'snow' | 'photos';
 
 export const MODE_BY_KEY: Record<string, SceneMode> = {
   '1': 'tree',
-  '2': 'burst',
+  '2': 'snow',
   '3': 'photos',
 };
 
+export const FINGERTIP_INDEXES = [4, 8, 12, 16, 20] as const;
+
 export function isSceneMode(value: string | undefined): value is SceneMode {
-  return value === 'tree' || value === 'burst' || value === 'photos';
+  return value === 'tree' || value === 'snow' || value === 'photos';
 }
 
 export function modeForPose(pose: HandPose): SceneMode | null {
   if (pose === 'fist') return 'tree';
-  if (pose === 'open') return 'burst';
+  if (pose === 'open') return 'snow';
   if (pose === 'ok') return 'photos';
   return null;
 }
 
-export function poseForMode(mode: SceneMode): Exclude<HandPose, 'none'> {
+export function poseForMode(mode: SceneMode): Exclude<HandPose, 'none' | 'pinch'> {
   if (mode === 'tree') return 'fist';
-  if (mode === 'burst') return 'open';
+  if (mode === 'snow') return 'open';
   return 'ok';
 }
 
 export function poseLabel(pose: HandPose): string {
-  if (pose === 'fist') return '握拳 · 圣诞树';
-  if (pose === 'open') return '张开手掌 · 光点';
+  if (pose === 'fist') return '握拳 · 成树';
+  if (pose === 'open') return '张开手掌 · 细雪';
   if (pose === 'ok') return 'OK · 照片';
+  if (pose === 'pinch') return '捏合 · 钉星';
   return '未识别';
 }
 
@@ -62,27 +65,48 @@ function palmSize(landmarks: Point[]): number {
 }
 
 /**
- * OK is decided before fist or open palm. A thumb-index pinch with the other
- * fingers up stays OK even when the index still looks extended, so the circle
- * is not swallowed by an open-palm reading.
+ * OK is decided before pinch, fist, or open palm. A thumb-index circle with the
+ * other fingers up stays OK. A tight pinch with those fingers down places a star.
  */
 export function classifyHandPose(landmarks: Point[]): HandPose {
   if (landmarks.length < 21) return 'none';
   const thumb = landmarks[4];
   const indexTip = landmarks[8];
+  const middleTip = landmarks[12];
   if (!thumb || !indexTip) return 'none';
   const pinch = distance(thumb, indexTip);
+  const palm = palmSize(landmarks);
   const middle = fingerExtended(landmarks, 12, 10);
   const ring = fingerExtended(landmarks, 16, 14);
   const pinky = fingerExtended(landmarks, 20, 18);
-  const others = [middle, ring, pinky].filter(Boolean).length;
-  if (pinch < palmSize(landmarks) * 0.48 && others >= 2) return 'ok';
-
   const index = fingerExtended(landmarks, 8, 6);
+  const others = [middle, ring, pinky].filter(Boolean).length;
+  const tight = pinch < palm * 0.42;
+  if (tight && others >= 2) return 'ok';
+  if (tight && others === 0 && middleTip && pinch < distance(thumb, middleTip) * 0.72) return 'pinch';
   const extended = [index, middle, ring, pinky].filter(Boolean).length;
   if (extended === 0) return 'fist';
   if (extended >= 4) return 'open';
   return 'none';
+}
+
+export function fingertipPoints(landmarks: readonly Point[]): Point[] {
+  return FINGERTIP_INDEXES.flatMap((index) => {
+    const point = landmarks[index];
+    return point ? [point] : [];
+  });
+}
+
+export function handMotion(previous: Point | null, next: Point | null): number {
+  if (!previous || !next) return 0;
+  return Math.hypot(next.x - previous.x, next.y - previous.y);
+}
+
+/** Fist pulls the finger-stars home. An open palm keeps a soft tether. Motion draws the rest. */
+export function tetherGoal(handVisible: boolean, pose: HandPose): number {
+  if (!handVisible || pose === 'fist') return 0;
+  if (pose === 'open') return 0.42;
+  return 1;
 }
 
 export interface DebounceOptions {
@@ -120,12 +144,12 @@ export function lockPose(pose: Exclude<HandPose, 'none'>, now: number, options: 
 }
 
 export function tally(history: readonly HandPose[]): Record<HandPose, number> {
-  const counts: Record<HandPose, number> = { fist: 0, open: 0, ok: 0, none: 0 };
+  const counts: Record<HandPose, number> = { fist: 0, open: 0, ok: 0, pinch: 0, none: 0 };
   for (const pose of history) counts[pose] += 1;
   return counts;
 }
 
-/** OK wins as soon as it has enough votes, even when fist or open appears more often. */
+/** OK wins as soon as it has enough votes, even when pinch, fist, or open appears more often. */
 export function decidePose(
   history: readonly HandPose[],
   previous: HandPose,
@@ -136,7 +160,7 @@ export function decidePose(
   if (counts.ok >= options.okVotes) return 'ok';
   let best = previous;
   let bestCount = options.poseVotes - 1;
-  for (const pose of ['fist', 'open'] as const) {
+  for (const pose of ['fist', 'open', 'pinch'] as const) {
     const count = counts[pose];
     if (count > bestCount) {
       best = pose;
@@ -149,6 +173,7 @@ export function decidePose(
 export interface PoseStep {
   state: DebounceState;
   mode: SceneMode | null;
+  pinned: boolean;
 }
 
 export function pushPose(
@@ -159,14 +184,22 @@ export function pushPose(
 ): PoseStep {
   const history = state.history.concat(pose).slice(-options.window);
   const next = decidePose(history, state.stable, options);
+  if (next === state.stable) {
+    return { state: { history, stable: state.stable, committedAt: state.committedAt }, mode: null, pinned: false };
+  }
   const mode = modeForPose(next);
-  if (next === state.stable || !mode) {
-    return { state: { history, stable: state.stable, committedAt: state.committedAt }, mode: null };
+  const pinning = next === 'pinch';
+  if (!mode && !pinning) {
+    return { state: { history, stable: state.stable, committedAt: state.committedAt }, mode: null, pinned: false };
   }
   const held = now - state.committedAt;
-  const needed = next === 'ok' ? options.okHoldMs : options.minHoldMs;
+  const needed = next === 'ok' || next === 'pinch' ? options.okHoldMs : options.minHoldMs;
   if (state.stable !== 'none' && held < needed) {
-    return { state: { history, stable: state.stable, committedAt: state.committedAt }, mode: null };
+    return { state: { history, stable: state.stable, committedAt: state.committedAt }, mode: null, pinned: false };
   }
-  return { state: { history, stable: next, committedAt: now }, mode };
+  return {
+    state: { history, stable: next, committedAt: now },
+    mode,
+    pinned: pinning,
+  };
 }
