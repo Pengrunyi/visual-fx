@@ -151,34 +151,38 @@ export const previews: Record<string, PreviewDraw> = {
   },
   christmas: (ctx, time, w, h) => {
     const sky = ctx.createLinearGradient(0, 0, 0, h);
-    sky.addColorStop(0, '#1a0e08');
-    sky.addColorStop(1, '#070402');
+    sky.addColorStop(0, '#07091a');
+    sky.addColorStop(1, '#10162c');
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, w, h);
-    const glow = ctx.createRadialGradient(w / 2, h * 0.48, 8, w / 2, h * 0.5, w * 0.34);
-    glow.addColorStop(0, 'rgba(255, 196, 96, 0.28)');
-    glow.addColorStop(1, 'rgba(255, 196, 96, 0)');
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, w, h);
-    const cx = w / 2;
-    for (let i = 0; i < 110; i += 1) {
-      const y01 = i / 110;
-      const y = h * 0.84 - y01 * h * 0.62;
-      const layer = (y01 * 6) % 1;
-      const spread = (1 - y01) * w * 0.22 * (0.35 + 0.65 * (1 - layer));
-      const x = cx + Math.sin(i * 1.7 + time * 0.6) * spread;
-      ctx.fillStyle = i % 8 === 0 ? '#ff5a5a' : i % 5 === 0 ? '#7dffb3' : '#f0c36a';
-      ctx.fillRect(x, y, i % 8 === 0 ? 3 : 2, i % 8 === 0 ? 3 : 2);
+    for (let i = 0; i < 28; i += 1) {
+      ctx.fillStyle = i % 9 === 0 ? 'rgba(236, 220, 184, 0.8)' : 'rgba(232, 238, 248, 0.75)';
+      ctx.fillRect((i * 47) % w, (i * 29) % h, 1.4, 1.4);
     }
-    ctx.fillStyle = '#fff1c2';
+    const cx = w / 2;
+    const top = h * 0.18;
+    const bottom = h * 0.78;
+    ctx.strokeStyle = 'rgba(214, 224, 238, 0.85)';
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.arc(cx, h * 0.16, 5 + Math.sin(time * 3) * 0.6, 0, Math.PI * 2);
+    ctx.moveTo(cx, top);
+    ctx.lineTo(cx - w * 0.22, bottom);
+    ctx.moveTo(cx, top);
+    ctx.lineTo(cx + w * 0.22, bottom);
+    ctx.moveTo(cx - w * 0.08, h * 0.38);
+    ctx.lineTo(cx + w * 0.08, h * 0.38);
+    ctx.moveTo(cx - w * 0.15, h * 0.56);
+    ctx.lineTo(cx + w * 0.15, h * 0.56);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(231, 211, 161, 0.8)';
+    ctx.beginPath();
+    ctx.moveTo(cx, top + 6);
+    ctx.lineTo(cx, bottom);
+    ctx.stroke();
+    ctx.fillStyle = '#f7fbff';
+    ctx.beginPath();
+    ctx.arc(cx, top, 4 + Math.sin(time * 2) * 0.4, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#ff7a18';
-    ctx.lineWidth = 3;
-    const bob = Math.sin(time * 1.4) * 4;
-    ctx.strokeRect(w * 0.68, h * 0.34 + bob, 28, 36);
-    ctx.strokeRect(w * 0.22, h * 0.42 - bob, 24, 32);
   },
   'snow-globe': (ctx, time, w, h) => {
     ctx.fillStyle = '#0b1018';

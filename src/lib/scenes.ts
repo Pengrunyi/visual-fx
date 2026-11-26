@@ -18,15 +18,15 @@ export const scenes: readonly SceneInfo[] = [
   {
     slug: 'christmas',
     route: '/christmas/',
-    titleZh: '圣诞手势粒子',
-    titleEn: 'Christmas Gestures',
-    pageTitle: '圣诞手势粒子 · Christmas Gestures',
-    blurbZh: '握拳成树，张掌化光，OK 弹出橙色相框。',
-    blurbEn: 'A fist builds the tree, an open palm bursts it, OK reveals photos.',
+    titleZh: '星座织树',
+    titleEn: 'Constellation Tree',
+    pageTitle: '星座织树 · Constellation Tree',
+    blurbZh: '星线织成圣诞树，张掌落细雪，OK 把照片挂上枝头。',
+    blurbEn: 'Stars weave a Christmas tree. An open palm brings snow; OK hangs photos.',
     description:
-      '金色粒子圣诞树随手势变化：握拳聚合成树，张开手掌炸成闪烁光点，OK 手势弹出橙色相框。照片与摄像头只在本地处理。',
-    accent: '#f0c36a',
-    accent2: '#ff7a18',
+      '夜空里的星座圣诞树：握拳收紧成树，张开手掌落下细雪，OK 手势把橙色相框挂上枝头。捏合可钉一颗星。照片与摄像头只在本地处理。',
+    accent: '#d5deee',
+    accent2: '#e7d3a1',
   },
   {
     slug: 'attention',
