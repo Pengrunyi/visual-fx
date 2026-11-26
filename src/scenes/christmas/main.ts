@@ -1,51 +1,70 @@
 import '../../styles/scene.css';
 import './christmas.css';
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
+import {
+  AdditiveBlending,
+  AmbientLight,
+  BufferAttribute,
+  BufferGeometry,
+  CanvasTexture,
+  ClampToEdgeWrapping,
+  Color,
+  ConeGeometry,
+  CylinderGeometry,
+  DirectionalLight,
+  DoubleSide,
+  Group,
+  Mesh,
+  MeshBasicMaterial,
+  MeshStandardMaterial,
+  Object3D,
+  PerspectiveCamera,
+  Path,
+  PlaneGeometry,
+  Points,
+  Scene,
+  ShaderMaterial,
+  Shape,
+  ShapeGeometry,
+  SphereGeometry,
+  Sprite,
+  SpriteMaterial,
+  SRGBColorSpace,
+  Texture,
+  Vector3,
+  WebGLRenderer,
+} from 'three';
 import { mountHud } from '../../lib/hud';
 import { startLoop, toast } from '../../lib/loop';
 import { MILK_FROG_MODEL, MILK_FROG_WASM_DIR } from '../../lib/mediapipePublic';
 import { sceneBySlug } from '../../lib/scenes';
 import { pageUrl } from '../../lib/url';
 import { cameraErrorMessage } from '../milk-frog/gestures';
-import {
-  createConstellation,
-  createSnow,
-  createStarfield,
-  edgeVisibility,
-  loosenedPosition,
-  mulberry32,
-  nearestNode,
-  nextPin,
-  ornamentAnchor,
-  projectTree,
-  stepSnow,
-  type SnowFlake,
-} from './constellation';
+import { TREE_HEIGHT, TREE_RADIUS, createCloud, ornamentAnchors, type ParticleSet } from './cloud';
 import {
   MODE_BY_KEY,
   classifyHandPose,
   createDebounce,
-  fingertipPoints,
-  handMotion,
   isSceneMode,
   lockPose,
   poseForMode,
   poseLabel,
   pushPose,
-  tetherGoal,
   type DebounceState,
   type Point,
   type SceneMode,
 } from './gestures';
-import { MAX_LOCAL_PHOTOS, selectLocalImages } from './photos';
+import { frameCover, MAX_LOCAL_PHOTOS, selectLocalImages } from './photos';
 import { createSampleCards } from './samples';
 import {
   cappedPixelRatio,
-  damp,
+  framePose,
   framePresence,
+  ornamentBudget,
+  ornamentPresence,
+  particleBudget,
   popScale,
-  snowBudget,
-  starBudget,
+  starPresence,
   stepStage,
   type StageState,
 } from './stage';
@@ -59,33 +78,21 @@ const alertEl = document.querySelector<HTMLElement>('#alert');
 const modelStatus = document.querySelector<HTMLElement>('#model-status');
 const uploadButton = document.querySelector<HTMLButtonElement>('#upload-button');
 const resetButton = document.querySelector<HTMLButtonElement>('#reset-photos');
-const pinButton = document.querySelector<HTMLButtonElement>('#pin-button');
 const photoInput = document.querySelector<HTMLInputElement>('#photo-input');
-const ornamentHost = document.querySelector<HTMLElement>('#ornaments');
 const fallbackNote = document.querySelector<HTMLElement>('#fallback-note');
 const chipButtons = [...document.querySelectorAll<HTMLButtonElement>('.chips button')];
-if (!canvas || !video || !camCanvas || !camButton || !camLabel || !alertEl || !modelStatus || !uploadButton || !resetButton || !pinButton || !photoInput || !ornamentHost) {
+if (!canvas || !video || !camCanvas || !camButton || !camLabel || !alertEl || !modelStatus || !uploadButton || !resetButton || !photoInput) {
   throw new Error('missing christmas nodes');
 }
 
-const stageCanvas: HTMLCanvasElement = canvas;
 const sceneInfo = sceneBySlug('christmas');
 const draw = camCanvas.getContext('2d');
-const stageCtx = stageCanvas.getContext('2d');
 const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 let reduced = motionQuery.matches;
 let targetMode: SceneMode = 'tree';
-let stage: StageState = { loosen: 0, snow: 0, photos: 0 };
+let stage: StageState = { particle: 0, photos: 0 };
 let debounced: DebounceState = createDebounce(0);
-let tether = 0;
-let fingertips: Point[] = [];
-let previousWrist: Point | null = null;
 const userUrls: string[] = [];
-const pins: { x: number; y: number }[] = [];
-const tree = createConstellation();
-const random = mulberry32(11);
-const sky = createStarfield(starBudget(window.innerWidth, reduced), random);
-const flakes: SnowFlake[] = createSnow(snowBudget(window.innerWidth, reduced), mulberry32(29));
 
 function showError(message: string): void {
   alertEl!.hidden = false;
@@ -103,9 +110,9 @@ function paintChips(): void {
     button.classList.toggle('active', on);
     button.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
-  if (document.body.classList.contains('no-canvas') && fallbackNote) {
-    const label = targetMode === 'tree' ? '星座圣诞树' : targetMode === 'snow' ? '细雪' : '橙色相框';
-    fallbackNote.textContent = `已切换到${label}。当前浏览器无法显示星图，按钮和按键仍可切换。`;
+  if (document.body.classList.contains('no-webgl') && fallbackNote) {
+    const label = targetMode === 'tree' ? '圣诞树' : targetMode === 'burst' ? '闪烁光点' : '橙色相框';
+    fallbackNote.textContent = `已切换到${label}。当前浏览器无法显示粒子，按钮和按键仍可切换。`;
   }
 }
 
@@ -119,22 +126,16 @@ function useManual(mode: SceneMode): void {
   applyMode(mode);
 }
 
-function placePin(): void {
-  if (pins.length >= 8) return;
-  const slot = nextPin(pins.length);
-  pins.push({ x: slot.x, y: slot.y });
-}
-
 paintChips();
 
 mountHud({
-  title: (lang) => (lang === 'zh' ? sceneInfo?.titleZh ?? '星座织树' : sceneInfo?.titleEn ?? 'Constellation Tree'),
+  title: (lang) => (lang === 'zh' ? sceneInfo?.titleZh ?? '圣诞手势粒子' : sceneInfo?.titleEn ?? 'Christmas Gestures'),
   shareUrl: () => pageUrl('/christmas/'),
   controls: (lang) => [{
     kind: 'note',
     text: lang === 'zh'
-      ? '握拳把星线收紧成圣诞树，张开手掌落下细雪，OK 把橙色相框挂上枝头。捏合或点画面可钉一颗星。指尖会变成活的星。照片和摄像头画面只留在这台设备上。'
-      : 'A fist tightens the constellation, an open palm brings fine snow, and OK hangs orange frames on the branches. A pinch pins a star. Photos and camera frames stay on this device.',
+      ? '握拳聚合成金色圣诞树，张开手掌炸成光点，OK 手势在光点中弹出橙色相框。按键 1-3 或点按钮也行。照片和摄像头画面只留在这台设备上，不会上传。'
+      : 'A fist gathers the gold tree, an open palm bursts it into sparks, and OK raises orange frames. Keys 1-3 do the same. Photos and camera frames stay on this device.',
   }],
 });
 
@@ -142,11 +143,6 @@ chipButtons.forEach((button) => {
   button.addEventListener('click', () => {
     if (isSceneMode(button.dataset.mode)) useManual(button.dataset.mode);
   });
-});
-pinButton.addEventListener('click', () => placePin());
-stageCanvas.addEventListener('pointerdown', (event) => {
-  if (event.target !== stageCanvas) return;
-  placePin();
 });
 
 window.addEventListener('keydown', (event) => {
@@ -159,37 +155,418 @@ window.addEventListener('keydown', (event) => {
   useManual(mode);
 });
 
-interface OrnamentView {
-  frame: HTMLDivElement;
-  url?: string;
+function makeGlowTexture(): CanvasTexture {
+  const board = document.createElement('canvas');
+  board.width = 128;
+  board.height = 128;
+  const ctx = board.getContext('2d');
+  if (!ctx) throw new Error('2d');
+  const glow = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  glow.addColorStop(0, 'rgba(255, 236, 196, 0.95)');
+  glow.addColorStop(0.35, 'rgba(255, 176, 72, 0.28)');
+  glow.addColorStop(1, 'rgba(255, 140, 40, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 128, 128);
+  const texture = new CanvasTexture(board);
+  texture.colorSpace = SRGBColorSpace;
+  return texture;
 }
 
-const ornamentViews: OrnamentView[] = [];
-
-function clearOrnaments(): void {
-  ornamentViews.forEach((view) => view.frame.remove());
-  ornamentViews.length = 0;
+function makeStarTexture(): CanvasTexture {
+  const board = document.createElement('canvas');
+  board.width = 256;
+  board.height = 256;
+  const ctx = board.getContext('2d');
+  if (!ctx) throw new Error('2d');
+  ctx.translate(128, 128);
+  const fill = ctx.createRadialGradient(0, 0, 4, 0, 0, 90);
+  fill.addColorStop(0, '#fff8e4');
+  fill.addColorStop(0.45, '#ffd56a');
+  fill.addColorStop(1, '#e39b3a');
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  for (let i = 0; i < 10; i += 1) {
+    const angle = (i / 10) * Math.PI * 2 - Math.PI / 2;
+    const radius = i % 2 === 0 ? 112 : 46;
+    const x = Math.cos(angle) * radius;
+    const y = Math.sin(angle) * radius;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+  const texture = new CanvasTexture(board);
+  texture.colorSpace = SRGBColorSpace;
+  return texture;
 }
 
-function mountOrnaments(items: { src: string; label: string; url?: string }[]): void {
-  clearOrnaments();
+function makeGroundTexture(): CanvasTexture {
+  const board = document.createElement('canvas');
+  board.width = 256;
+  board.height = 256;
+  const ctx = board.getContext('2d');
+  if (!ctx) throw new Error('2d');
+  const glow = ctx.createRadialGradient(128, 128, 8, 128, 128, 128);
+  glow.addColorStop(0, 'rgba(146, 88, 32, 0.55)');
+  glow.addColorStop(0.5, 'rgba(70, 36, 14, 0.2)');
+  glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 256, 256);
+  const texture = new CanvasTexture(board);
+  texture.colorSpace = SRGBColorSpace;
+  return texture;
+}
+
+const pointVertex = `
+  attribute vec3 aBurst;
+  attribute vec3 aColor;
+  attribute float aSize;
+  attribute float aSeed;
+  uniform float uTime;
+  uniform float uMorph;
+  uniform float uPixelRatio;
+  uniform float uTwinkle;
+  varying vec3 vColor;
+  varying float vSeed;
+  void main() {
+    vec3 pos = mix(position, aBurst, uMorph);
+    float flow = uTime * (0.55 + aSeed * 0.45);
+    float drift = uTwinkle * (0.012 + uMorph * 0.06);
+    pos.x += sin(flow + position.y * 3.0) * drift;
+    pos.y += cos(flow * 1.25 + aSeed * 8.0) * drift;
+    pos.z += sin(flow * 0.8 + position.x * 2.0) * drift * uMorph;
+    float len = length(aBurst);
+    if (len > 0.001) pos += (aBurst / len) * sin(uTime * 0.9 + aSeed * 12.0) * 0.12 * uMorph * uTwinkle;
+    vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+    gl_PointSize = clamp(aSize * uPixelRatio * (78.0 / max(1.2, -mv.z)), 1.0, 8.0);
+    gl_Position = projectionMatrix * mv;
+    vColor = aColor;
+    vSeed = aSeed;
+  }
+`;
+
+const pointFragment = `
+  varying vec3 vColor;
+  varying float vSeed;
+  uniform float uTime;
+  uniform float uTwinkle;
+  uniform float uGain;
+  void main() {
+    float d = length(gl_PointCoord - 0.5);
+    if (d > 0.5) discard;
+    float core = smoothstep(0.5, 0.02, d);
+    float hot = smoothstep(0.18, 0.0, d);
+    float tw = uTwinkle > 0.5 ? 0.7 + 0.3 * sin(uTime * (2.0 + vSeed * 5.0) + vSeed * 20.0) : 1.0;
+    vec3 color = vColor * (0.42 + hot) * tw * uGain;
+    gl_FragColor = vec4(color, core);
+  }
+`;
+
+function makePoints(set: ParticleSet, gain: number): { points: Points; material: ShaderMaterial } {
+  const geometry = new BufferGeometry();
+  geometry.setAttribute('position', new BufferAttribute(set.tree, 3));
+  geometry.setAttribute('aBurst', new BufferAttribute(set.burst, 3));
+  geometry.setAttribute('aColor', new BufferAttribute(set.color, 3));
+  geometry.setAttribute('aSize', new BufferAttribute(set.size, 1));
+  geometry.setAttribute('aSeed', new BufferAttribute(set.seed, 1));
+  const material = new ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    depthTest: true,
+    blending: AdditiveBlending,
+    toneMapped: false,
+    uniforms: {
+      uTime: { value: 0 },
+      uMorph: { value: 0 },
+      uPixelRatio: { value: 1 },
+      uTwinkle: { value: 1 },
+      uGain: { value: gain },
+    },
+    vertexShader: pointVertex,
+    fragmentShader: pointFragment,
+  });
+  const points = new Points(geometry, material);
+  points.frustumCulled = false;
+  points.renderOrder = 4;
+  return { points, material };
+}
+
+const glowTexture = makeGlowTexture();
+const view = new Scene();
+const world = new Group();
+view.add(world);
+view.add(new AmbientLight(0xfff1d2, 0.72));
+const keyLight = new DirectionalLight(0xfff6e4, 1.7);
+keyLight.position.set(2.2, 5.4, 3.4);
+view.add(keyLight);
+const rimLight = new DirectionalLight(0xff8a3c, 0.55);
+rimLight.position.set(-2.8, 1.6, -1.4);
+view.add(rimLight);
+
+const count = particleBudget(window.innerWidth, reduced);
+const cloud = createCloud(count, Math.random);
+const needles = makePoints(cloud.needles, 0.62);
+const sparks = makePoints(cloud.sparks, 1.2);
+world.add(needles.points, sparks.points);
+const shaderMaterials = [needles.material, sparks.material];
+
+const coneMaterial = new MeshBasicMaterial({
+  color: 0x6b4718,
+  transparent: true,
+  opacity: 0.4,
+  side: DoubleSide,
+  depthWrite: false,
+});
+const cone = new Mesh(new ConeGeometry(TREE_RADIUS * 0.86, TREE_HEIGHT, 48, 1, true), coneMaterial);
+cone.position.y = TREE_HEIGHT / 2;
+cone.renderOrder = 0;
+const innerMaterial = new MeshBasicMaterial({
+  color: 0x2c1c0e,
+  transparent: true,
+  opacity: 0.34,
+  side: DoubleSide,
+  depthWrite: false,
+});
+const inner = new Mesh(new ConeGeometry(TREE_RADIUS * 0.42, TREE_HEIGHT * 0.92, 32, 1, true), innerMaterial);
+inner.position.y = TREE_HEIGHT * 0.48;
+inner.renderOrder = 0;
+const trunkMaterial = new MeshBasicMaterial({ color: 0x3b2618, transparent: true, opacity: 1 });
+const trunk = new Mesh(new CylinderGeometry(0.08, 0.14, 0.42, 16), trunkMaterial);
+trunk.position.y = -0.16;
+world.add(cone, inner, trunk);
+
+const sphere = new SphereGeometry(1, 28, 18);
+const ornaments: { mesh: Mesh; tree: Vector3; burst: Vector3; base: number }[] = [];
+ornamentAnchors(ornamentBudget(window.innerWidth, reduced)).forEach((anchor, index) => {
+  const material = new MeshStandardMaterial({
+    color: anchor.color,
+    emissive: new Color(anchor.color),
+    emissiveIntensity: 0.28,
+    metalness: 0.58,
+    roughness: 0.24,
+  });
+  const mesh = new Mesh(sphere, material);
+  const base = 0.09 + (index % 3) * 0.02;
+  mesh.scale.setScalar(base);
+  mesh.position.set(anchor.tree.x, anchor.tree.y, anchor.tree.z);
+  mesh.renderOrder = 2;
+  world.add(mesh);
+  ornaments.push({
+    mesh,
+    tree: new Vector3(anchor.tree.x, anchor.tree.y, anchor.tree.z),
+    burst: new Vector3(anchor.burst.x, anchor.burst.y, anchor.burst.z),
+    base,
+  });
+});
+
+const star = new Sprite(new SpriteMaterial({
+  map: makeStarTexture(),
+  transparent: true,
+  depthWrite: false,
+  blending: AdditiveBlending,
+  toneMapped: false,
+}));
+star.position.set(0, TREE_HEIGHT + 0.18, 0);
+star.scale.setScalar(0.78);
+star.renderOrder = 5;
+const starGlow = new Sprite(new SpriteMaterial({
+  map: glowTexture,
+  color: 0xffd27a,
+  transparent: true,
+  depthWrite: false,
+  blending: AdditiveBlending,
+  toneMapped: false,
+  opacity: 0.7,
+}));
+starGlow.position.copy(star.position);
+starGlow.scale.setScalar(1.7);
+starGlow.renderOrder = 5;
+world.add(starGlow, star);
+
+const groundMaterial = new MeshBasicMaterial({
+  map: makeGroundTexture(),
+  transparent: true,
+  depthWrite: false,
+  opacity: 0.9,
+});
+const ground = new Mesh(new PlaneGeometry(7.2, 7.2), groundMaterial);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -0.04;
+ground.renderOrder = 0;
+world.add(ground);
+
+const dustCount = reduced ? 140 : 520;
+const dustGeometry = new BufferGeometry();
+const dustPositions = new Float32Array(dustCount * 3);
+const dustSeeds = new Float32Array(dustCount);
+for (let i = 0; i < dustCount; i += 1) {
+  dustPositions[i * 3] = (Math.random() - 0.5) * 8;
+  dustPositions[i * 3 + 1] = Math.random() * 4.4;
+  dustPositions[i * 3 + 2] = (Math.random() - 0.5) * 6;
+  dustSeeds[i] = Math.random();
+}
+dustGeometry.setAttribute('position', new BufferAttribute(dustPositions, 3));
+dustGeometry.setAttribute('aSeed', new BufferAttribute(dustSeeds, 1));
+const dustMaterial = new ShaderMaterial({
+  transparent: true,
+  depthWrite: false,
+  blending: AdditiveBlending,
+  toneMapped: false,
+  uniforms: {
+    uTime: { value: 0 },
+    uPixelRatio: { value: 1 },
+    uTwinkle: { value: 1 },
+  },
+  vertexShader: `
+    attribute float aSeed;
+    uniform float uTime;
+    uniform float uPixelRatio;
+    uniform float uTwinkle;
+    void main() {
+      vec3 pos = position;
+      pos.y = mod(position.y + uTime * uTwinkle * (0.08 + aSeed * 0.14), 4.8) - 0.3;
+      pos.x += sin(uTime * 0.22 * uTwinkle + aSeed * 6.0) * 0.2;
+      vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+      gl_PointSize = clamp((0.65 + aSeed) * uPixelRatio * (34.0 / max(1.0, -mv.z)), 1.0, 3.4);
+      gl_Position = projectionMatrix * mv;
+    }
+  `,
+  fragmentShader: `
+    void main() {
+      float d = length(gl_PointCoord - 0.5);
+      if (d > 0.5) discard;
+      float a = smoothstep(0.5, 0.0, d) * 0.5;
+      gl_FragColor = vec4(vec3(1.0, 0.84, 0.5), a);
+    }
+  `,
+});
+const dust = new Points(dustGeometry, dustMaterial);
+dust.frustumCulled = false;
+dust.renderOrder = 1;
+view.add(dust);
+
+const bokeh: Sprite[] = [];
+for (let i = 0; i < 6; i += 1) {
+  const sprite = new Sprite(new SpriteMaterial({
+    map: glowTexture,
+    color: i % 2 === 0 ? 0xffc56a : 0xffe6b0,
+    transparent: true,
+    depthWrite: false,
+    blending: AdditiveBlending,
+    toneMapped: false,
+    opacity: 0.09,
+  }));
+  const angle = (i / 6) * Math.PI * 2;
+  sprite.position.set(Math.cos(angle) * 2.6, 0.8 + (i % 3) * 0.85, -2.4);
+  sprite.scale.setScalar(1.5 + (i % 3) * 0.45);
+  sprite.renderOrder = 0;
+  view.add(sprite);
+  bokeh.push(sprite);
+}
+
+const frameRoot = new Group();
+view.add(frameRoot);
+function makeBorderGeometry(): ShapeGeometry {
+  const outerW = 1.18;
+  const outerH = 1.46;
+  const innerW = 1.02;
+  const innerH = 1.26;
+  const shape = new Shape();
+  shape.moveTo(-outerW / 2, -outerH / 2);
+  shape.lineTo(outerW / 2, -outerH / 2);
+  shape.lineTo(outerW / 2, outerH / 2);
+  shape.lineTo(-outerW / 2, outerH / 2);
+  const hole = new Path();
+  hole.moveTo(-innerW / 2, -innerH / 2);
+  hole.lineTo(-innerW / 2, innerH / 2);
+  hole.lineTo(innerW / 2, innerH / 2);
+  hole.lineTo(innerW / 2, -innerH / 2);
+  shape.holes.push(hole);
+  return new ShapeGeometry(shape);
+}
+const borderGeometry = makeBorderGeometry();
+const photoGeometry = new PlaneGeometry(1.0, 1.24);
+interface FrameEntry {
+  group: Group;
+  map: Texture;
+  owned: boolean;
+}
+const frameEntries: FrameEntry[] = [];
+
+function disposeMaterial(node: Object3D): void {
+  if (!('material' in node)) return;
+  const material = (node as Mesh).material;
+  if (Array.isArray(material)) material.forEach((item) => item.dispose());
+  else material?.dispose();
+}
+
+function clearFrames(): void {
+  for (const entry of frameEntries) {
+    frameRoot.remove(entry.group);
+    entry.group.traverse(disposeMaterial);
+    if (entry.owned) entry.map.dispose();
+  }
+  frameEntries.length = 0;
+}
+
+function buildFrame(map: Texture): Group {
+  const group = new Group();
+  const border = new Mesh(borderGeometry, new MeshBasicMaterial({
+    color: 0xff7a18,
+    side: DoubleSide,
+    depthWrite: true,
+  }));
+  const photo = new Mesh(photoGeometry, new MeshBasicMaterial({
+    map,
+    side: DoubleSide,
+    depthWrite: true,
+  }));
+  photo.position.z = 0.03;
+  const glow = new Sprite(new SpriteMaterial({
+    map: glowTexture,
+    color: 0xff7a18,
+    transparent: true,
+    blending: AdditiveBlending,
+    depthWrite: false,
+    opacity: 0.42,
+  }));
+  glow.position.z = -0.06;
+  glow.scale.set(2.15, 2.45, 1);
+  border.renderOrder = 3;
+  photo.renderOrder = 3;
+  glow.renderOrder = 2;
+  group.add(glow, border, photo);
+  return group;
+}
+
+function mountFrames(items: { map: Texture; owned: boolean }[]): void {
+  clearFrames();
   items.forEach((item) => {
-    const frame = document.createElement('div');
-    frame.className = 'ornament';
-    const image = document.createElement('img');
-    image.alt = item.label;
-    image.src = item.src;
-    frame.append(image);
-    ornamentHost!.append(frame);
-    ornamentViews.push({ frame, url: item.url });
+    const group = buildFrame(item.map);
+    frameRoot.add(group);
+    frameEntries.push({ group, map: item.map, owned: item.owned });
   });
 }
 
-const sampleSources = createSampleCards().map((card) => ({
-  src: card.canvas.toDataURL('image/png'),
-  label: card.label,
-}));
-mountOrnaments(sampleSources);
+const sampleTextures = createSampleCards().map((card) => {
+  const texture = new CanvasTexture(card.canvas);
+  texture.colorSpace = SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+});
+mountFrames(sampleTextures.map((map) => ({ map, owned: false })));
+
+function textureFromImage(image: HTMLImageElement): Texture {
+  const texture = new Texture(image);
+  texture.colorSpace = SRGBColorSpace;
+  const crop = frameCover(image.naturalWidth || image.width, image.naturalHeight || image.height);
+  texture.repeat.set(crop.repeatX, crop.repeatY);
+  texture.offset.set(crop.offsetX, crop.offsetY);
+  texture.wrapS = ClampToEdgeWrapping;
+  texture.wrapT = ClampToEdgeWrapping;
+  texture.needsUpdate = true;
+  return texture;
+}
 
 function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -206,12 +583,12 @@ function revokeUserUrls(): void {
 }
 
 async function adoptFiles(files: File[], extra: number): Promise<void> {
-  const next: { src: string; label: string; url: string }[] = [];
+  const next: { map: Texture; url: string }[] = [];
   for (const file of files) {
     const url = URL.createObjectURL(file);
     try {
-      await loadImage(url);
-      next.push({ src: url, label: '本地照片', url });
+      const image = await loadImage(url);
+      next.push({ map: textureFromImage(image), url });
     } catch {
       URL.revokeObjectURL(url);
     }
@@ -222,7 +599,7 @@ async function adoptFiles(files: File[], extra: number): Promise<void> {
   }
   revokeUserUrls();
   userUrls.push(...next.map((item) => item.url));
-  mountOrnaments(next);
+  mountFrames(next.map((item) => ({ map: item.map, owned: true })));
   resetButton!.hidden = false;
   clearError();
   useManual('photos');
@@ -243,21 +620,47 @@ photoInput.addEventListener('change', () => {
 });
 resetButton.addEventListener('click', () => {
   revokeUserUrls();
-  mountOrnaments(sampleSources);
+  mountFrames(sampleTextures.map((map) => ({ map, owned: false })));
   resetButton!.hidden = true;
   clearError();
   toast('已恢复示例卡片');
 });
 
+const camera = new PerspectiveCamera(42, 1, 0.1, 40);
+let renderer: WebGLRenderer | null = null;
+try {
+  renderer = new WebGLRenderer({
+    canvas,
+    antialias: window.innerWidth >= 760 && !reduced,
+    alpha: false,
+    powerPreference: 'high-performance',
+  });
+  renderer.setClearColor(0x100804, 1);
+  renderer.outputColorSpace = SRGBColorSpace;
+} catch {
+  renderer = null;
+  document.body.classList.add('no-webgl');
+  showError('当前浏览器无法显示粒子画面。按钮和按键仍然可以切换状态。');
+  paintChips();
+}
+
 function resize(): void {
   const width = window.innerWidth;
   const height = Math.max(1, window.innerHeight);
   const ratio = cappedPixelRatio(window.devicePixelRatio || 1, width, reduced);
-  stageCanvas.width = Math.floor(width * ratio);
-  stageCanvas.height = Math.floor(height * ratio);
-  stageCanvas.style.width = `${width}px`;
-  stageCanvas.style.height = `${height}px`;
-  stageCtx?.setTransform(ratio, 0, 0, ratio, 0, 0);
+  const aspect = width / height;
+  camera.aspect = aspect;
+  camera.fov = aspect < 0.82 ? 52 : 42;
+  const distance = aspect < 0.85 ? 8.8 : 7.35;
+  camera.position.set(0, 1.48, distance);
+  camera.lookAt(0, 1.42, 0);
+  camera.updateProjectionMatrix();
+  renderer?.setPixelRatio(ratio);
+  renderer?.setSize(width, height, false);
+  shaderMaterials.forEach((material) => {
+    material.uniforms.uPixelRatio!.value = ratio;
+  });
+  dustMaterial.uniforms.uPixelRatio!.value = ratio;
 }
 resize();
 window.addEventListener('resize', resize);
@@ -265,166 +668,6 @@ motionQuery.addEventListener?.('change', () => {
   reduced = motionQuery.matches;
   resize();
 });
-
-if (!stageCtx) {
-  document.body.classList.add('no-canvas');
-  showError('当前浏览器无法显示星图。按钮和按键仍然可以切换状态。');
-  paintChips();
-}
-
-function drawSky(ctx: CanvasRenderingContext2D, width: number, height: number, time: number): void {
-  const skyFill = ctx.createLinearGradient(0, 0, 0, height);
-  skyFill.addColorStop(0, '#07091a');
-  skyFill.addColorStop(0.55, '#121833');
-  skyFill.addColorStop(1, '#070814');
-  ctx.fillStyle = skyFill;
-  ctx.fillRect(0, 0, width, height);
-  const moon = ctx.createRadialGradient(width * 0.5, height * 0.4, 8, width * 0.5, height * 0.42, width * 0.32);
-  moon.addColorStop(0, 'rgba(150, 176, 220, 0.09)');
-  moon.addColorStop(1, 'rgba(150, 176, 220, 0)');
-  ctx.fillStyle = moon;
-  ctx.fillRect(0, 0, width, height);
-  sky.forEach((star) => {
-    const twinkle = reduced ? 0.8 : 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(time * 0.8 + star.phase));
-    ctx.fillStyle = star.warm ? `rgba(236, 220, 184, ${twinkle})` : `rgba(234, 240, 252, ${twinkle})`;
-    ctx.beginPath();
-    ctx.arc(star.x * width, star.y * height, star.radius, 0, Math.PI * 2);
-    ctx.fill();
-  });
-}
-
-function drawTree(ctx: CanvasRenderingContext2D, width: number, height: number, time: number): void {
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  const loosen = stage.loosen;
-  const points = tree.nodes.map((star, index) => projectTree(
-    loosenedPosition(star, loosen, time * 0.7 + index),
-    width,
-    height,
-  ));
-  tree.edges.forEach((edge, order) => {
-    const start = points[edge.a];
-    const end = points[edge.b];
-    if (!start || !end) return;
-    const visible = edgeVisibility(loosen, order, tree.edges.length);
-    if (visible <= 0.02) return;
-    const silver = edge.tone === 'silver';
-    ctx.strokeStyle = silver
-      ? `rgba(214, 224, 238, ${0.22 * visible})`
-      : `rgba(226, 206, 164, ${0.2 * visible})`;
-    ctx.lineWidth = 2.4;
-    ctx.beginPath();
-    ctx.moveTo(start.x, start.y);
-    ctx.lineTo(end.x, end.y);
-    ctx.stroke();
-    ctx.strokeStyle = silver
-      ? `rgba(232, 238, 248, ${0.72 * visible})`
-      : `rgba(236, 214, 164, ${0.78 * visible})`;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  });
-  points.forEach((point, index) => {
-    const star = tree.nodes[index];
-    if (!star || star.kind === 'apex') return;
-    const breathe = reduced ? 1 : 1 + Math.sin(time * 1.3 + index) * 0.08 * loosen;
-    const radius = (star.kind === 'outline' ? 2.15 : 1.55) * breathe;
-    ctx.fillStyle = 'rgba(244, 247, 255, 0.95)';
-    ctx.beginPath();
-    ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  pins.forEach((pin, index) => {
-    const point = projectTree(pin, width, height);
-    const pulse = reduced ? 1 : 1 + Math.sin(time * 1.6 + index) * 0.06;
-    drawSpark(ctx, point.x, point.y, 5.5 * pulse, '#f3e2b6');
-  });
-  const apex = points[0];
-  if (apex) {
-    const glow = ctx.createRadialGradient(apex.x, apex.y, 0, apex.x, apex.y, 28);
-    glow.addColorStop(0, 'rgba(255, 250, 236, 0.95)');
-    glow.addColorStop(0.35, 'rgba(232, 214, 170, 0.28)');
-    glow.addColorStop(1, 'rgba(232, 214, 170, 0)');
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(apex.x, apex.y, 28, 0, Math.PI * 2);
-    ctx.fill();
-    drawSpark(ctx, apex.x, apex.y, reduced ? 9 : 8.4 + Math.sin(time * 1.8) * 0.5, '#fffaf0');
-  }
-}
-
-function drawSpark(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, color: string): void {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  for (let i = 0; i < 8; i += 1) {
-    const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
-    const arm = i % 2 === 0 ? radius : radius * 0.38;
-    const px = Math.cos(angle) * arm;
-    const py = Math.sin(angle) * arm;
-    if (i === 0) ctx.moveTo(px, py);
-    else ctx.lineTo(px, py);
-  }
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
-}
-
-function drawSnow(ctx: CanvasRenderingContext2D, width: number, height: number): void {
-  if (stage.snow <= 0.02) return;
-  ctx.fillStyle = `rgba(244, 248, 255, ${0.75 * stage.snow})`;
-  flakes.forEach((flake) => {
-    ctx.beginPath();
-    ctx.arc(flake.x * width, flake.y * height, flake.size, 0, Math.PI * 2);
-    ctx.fill();
-  });
-}
-
-function drawHand(ctx: CanvasRenderingContext2D, width: number, height: number): void {
-  if (tether <= 0.02 || fingertips.length === 0) return;
-  const projected = tree.nodes.map((star) => projectTree(star, width, height));
-  const tips = fingertips.map((tip) => ({ x: (1 - tip.x) * width, y: tip.y * height }));
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = `rgba(226, 234, 248, ${0.45 * tether})`;
-  ctx.beginPath();
-  tips.forEach((tip, index) => {
-    if (index === 0) ctx.moveTo(tip.x, tip.y);
-    else ctx.lineTo(tip.x, tip.y);
-    const anchor = projected[nearestNode(tip, projected)];
-    if (!anchor) return;
-    ctx.moveTo(tip.x, tip.y);
-    ctx.lineTo(anchor.x, anchor.y);
-  });
-  ctx.stroke();
-  tips.forEach((tip) => drawSpark(ctx, tip.x, tip.y, 4.2, '#f7fbff'));
-}
-
-function layoutOrnaments(width: number, height: number): void {
-  ornamentViews.forEach((view, index) => {
-    const anchor = projectTree(ornamentAnchor(index, ornamentViews.length), width, height);
-    const presence = framePresence(stage.photos, index, ornamentViews.length);
-    view.frame.style.left = `${anchor.x}px`;
-    view.frame.style.top = `${anchor.y}px`;
-    view.frame.style.setProperty('--scale', popScale(presence).toFixed(3));
-    view.frame.style.setProperty('--fade', presence.toFixed(3));
-  });
-}
-
-function renderScene(dt: number, time: number): void {
-  if (!stageCtx) return;
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  stage = stepStage(stage, targetMode, dt, reduced);
-  stepSnow(flakes, dt, stage.snow, reduced);
-  const tetherTarget = tetherGoal(fingertips.length > 0, debounced.stable);
-  tether = reduced ? tetherTarget : damp(tether, tetherTarget, 2.6, dt);
-  stageCtx.clearRect(0, 0, width, height);
-  drawSky(stageCtx, width, height, time);
-  drawTree(stageCtx, width, height, time);
-  drawSnow(stageCtx, width, height);
-  drawHand(stageCtx, width, height);
-  layoutOrnaments(width, height);
-}
 
 const wasmBase = `${import.meta.env.BASE_URL}${MILK_FROG_WASM_DIR}`;
 const modelAssetPath = `${import.meta.env.BASE_URL}${MILK_FROG_MODEL}`;
@@ -493,8 +736,6 @@ function stopCamera(): void {
   camButton!.closest('.cam-card')?.classList.remove('live');
   camButton!.textContent = '开启摄像头';
   camLabel!.textContent = '摄像头未开启';
-  fingertips = [];
-  previousWrist = null;
   draw?.clearRect(0, 0, camCanvas!.width, camCanvas!.height);
 }
 
@@ -544,7 +785,7 @@ function drawHands(hands: Point[][]): void {
   const height = camCanvas!.height;
   for (const hand of hands) {
     draw.beginPath();
-    draw.strokeStyle = 'rgba(214, 224, 238, 0.9)';
+    draw.strokeStyle = 'rgba(240, 195, 106, 0.95)';
     draw.lineWidth = Math.max(2, width / 150);
     draw.lineJoin = 'round';
     draw.lineCap = 'round';
@@ -558,7 +799,7 @@ function drawHands(hands: Point[][]): void {
     draw.stroke();
     for (const point of hand) {
       draw.beginPath();
-      draw.fillStyle = '#f4f7ff';
+      draw.fillStyle = '#fff1d4';
       draw.arc(point.x * width, point.y * height, Math.max(2.2, width / 140), 0, Math.PI * 2);
       draw.fill();
     }
@@ -572,17 +813,9 @@ function nextStamp(now: number): number {
 }
 
 function observeHand(hand: Point[], now: number): void {
-  const wrist = hand[0] ?? null;
-  const motion = handMotion(previousWrist, wrist);
-  previousWrist = wrist;
-  fingertips = fingertipPoints(hand);
   const step = pushPose(debounced, classifyHandPose(hand), now);
   debounced = step.state;
   if (step.mode) applyMode(step.mode);
-  if (step.pinned) placePin();
-  if (motion > 0.02 && debounced.stable !== 'open' && debounced.stable !== 'fist') {
-    stage = { ...stage, loosen: Math.max(0, stage.loosen - motion * 0.8) };
-  }
   camLabel!.textContent = debounced.stable === 'none' ? '把一只手伸进画面' : poseLabel(debounced.stable);
 }
 
@@ -604,8 +837,6 @@ function detect(now: number): void {
     else {
       const step = pushPose(debounced, 'none', now);
       debounced = step.state;
-      fingertips = [];
-      previousWrist = null;
       camLabel!.textContent = '把一只手伸进画面';
     }
   } catch {
@@ -613,7 +844,51 @@ function detect(now: number): void {
   }
 }
 
+function renderScene(dt: number, time: number): void {
+  stage = stepStage(stage, targetMode, dt, reduced);
+  const twinkle = reduced ? 0 : 1;
+  shaderMaterials.forEach((material) => {
+    material.uniforms.uTime!.value = time;
+    material.uniforms.uMorph!.value = stage.particle;
+    material.uniforms.uTwinkle!.value = twinkle;
+  });
+  dustMaterial.uniforms.uTime!.value = time;
+  dustMaterial.uniforms.uTwinkle!.value = twinkle;
+  const body = starPresence(stage.particle);
+  coneMaterial.opacity = 0.42 * body;
+  innerMaterial.opacity = 0.32 * body;
+  trunkMaterial.opacity = body;
+  cone.visible = body > 0.04;
+  inner.visible = body > 0.04;
+  trunk.visible = body > 0.04;
+  groundMaterial.opacity = 0.9 * body;
+  const pulse = reduced ? 1 : 1 + Math.sin(time * 2.6) * 0.07;
+  star.visible = body > 0.04;
+  star.scale.setScalar(0.78 * Math.max(body, 0.001) * pulse);
+  starGlow.visible = body > 0.04;
+  starGlow.scale.setScalar(1.75 * Math.max(body, 0.001) * pulse);
+  const baubleMix = ornamentPresence(stage.particle);
+  ornaments.forEach((ornament) => {
+    ornament.mesh.position.lerpVectors(ornament.tree, ornament.burst, stage.particle);
+    ornament.mesh.scale.setScalar(Math.max(ornament.base * baubleMix, 0.0001));
+    ornament.mesh.visible = baubleMix > 0.04;
+  });
+  frameEntries.forEach((entry, index) => {
+    const presence = framePresence(stage.photos, index, frameEntries.length);
+    const pose = framePose(index, frameEntries.length, time);
+    entry.group.position.set(pose.x, pose.y, pose.z);
+    entry.group.lookAt(camera.position);
+    entry.group.scale.setScalar(Math.max(popScale(presence), 0.0001));
+    entry.group.visible = presence > 0.025;
+  });
+  world.rotation.y = reduced ? 0.38 : time * 0.11;
+  bokeh.forEach((sprite, index) => {
+    sprite.position.y = 0.8 + (index % 3) * 0.85 + Math.sin(time * 0.35 + index) * (reduced ? 0 : 0.08);
+  });
+  renderer?.render(view, camera);
+}
+
 startLoop((dt, time) => {
   detect(time * 1000);
-  renderScene(dt, time);
+  if (renderer) renderScene(dt, time);
 });
