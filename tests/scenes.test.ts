@@ -24,9 +24,9 @@ describe('scene registry', () => {
     expect(scenes[0]).toMatchObject({
       slug: 'christmas',
       route: '/christmas/',
-      titleZh: '圣诞手势粒子',
-      titleEn: 'Christmas Gestures',
-      pageTitle: '圣诞手势粒子 · Christmas Gestures',
+      titleZh: '星座织树',
+      titleEn: 'Constellation Tree',
+      pageTitle: '星座织树 · Constellation Tree',
     });
     expect(freshSlugs.has('christmas')).toBe(true);
     expect(freshSlugs.has('attention')).toBe(true);
