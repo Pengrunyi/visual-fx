@@ -1,7 +1,7 @@
 body.xmas {
   background:
-    radial-gradient(ellipse at 50% 18%, rgba(70, 92, 150, 0.16), transparent 42%),
-    #07091a;
+    radial-gradient(ellipse at 50% 38%, rgba(92, 52, 18, 0.28), transparent 46%),
+    #100804;
 }
 
 .vignette {
@@ -9,7 +9,7 @@ body.xmas {
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 42%, transparent 46%, rgba(3, 5, 16, 0.55) 100%);
+  background: radial-gradient(ellipse at 50% 42%, transparent 42%, rgba(0, 0, 0, 0.46) 100%);
 }
 
 .wordmark {
@@ -17,20 +17,22 @@ body.xmas {
   z-index: 4;
   left: 0;
   right: 0;
-  bottom: calc(158px + env(safe-area-inset-bottom));
+  bottom: calc(176px + env(safe-area-inset-bottom));
   text-align: center;
   pointer-events: none;
+  text-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
 }
 
 .merry {
   margin: 0;
-  color: rgba(232, 238, 248, 0.9);
-  font-family: Palatino, "Palatino Linotype", "Iowan Old Style", Georgia, "Songti SC", serif;
-  font-weight: 400;
-  letter-spacing: 0.46em;
-  text-indent: 0.46em;
-  font-size: clamp(12px, 2.15vw, 20px);
-  text-shadow: 0 0 22px rgba(186, 206, 236, 0.28);
+  color: #f6e2a8;
+  font-weight: 620;
+  letter-spacing: 0.28em;
+  font-size: clamp(14px, 3.5vw, 28px);
+  text-indent: 0.28em;
+  text-shadow:
+    0 0 18px rgba(255, 196, 90, 0.45),
+    0 2px 10px rgba(0, 0, 0, 0.55);
 }
 
 .legend {
@@ -38,11 +40,11 @@ body.xmas {
   max-width: 40rem;
   padding: 4px 12px;
   border-radius: 999px;
-  color: rgba(214, 224, 240, 0.78);
-  background: rgba(8, 12, 28, 0.42);
-  border: 1px solid rgba(198, 214, 238, 0.14);
+  color: rgba(255, 236, 210, 0.92);
+  background: rgba(12, 7, 4, 0.55);
+  border: 1px solid rgba(240, 195, 106, 0.16);
   font-size: 12px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   line-height: 1.45;
   text-align: center;
   backdrop-filter: blur(10px);
@@ -54,7 +56,7 @@ body.xmas {
   left: 50%;
   bottom: max(10px, env(safe-area-inset-bottom));
   transform: translateX(-50%);
-  width: min(720px, calc(100% - 108px));
+  width: min(680px, calc(100% - 108px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -63,7 +65,7 @@ body.xmas {
 
 .model-status {
   margin: 0;
-  color: rgba(198, 210, 230, 0.68);
+  color: rgba(246, 220, 170, 0.7);
   font-size: 12px;
   text-align: center;
 }
@@ -75,18 +77,17 @@ body.xmas {
   justify-content: center;
 }
 
-.chips button,
-.upload-row button {
+.chips button {
   min-height: 44px;
-  border-color: rgba(198, 214, 238, 0.28);
-  background: rgba(10, 14, 28, 0.62);
-  color: #e4ebf6;
+  border-color: rgba(240, 195, 106, 0.35);
+  background: rgba(18, 10, 6, 0.72);
+  color: #f6e2b0;
   backdrop-filter: blur(12px);
 }
 
 .chips button.active {
-  background: #e8eef8;
-  color: #151924;
+  background: #f0c36a;
+  color: #2a1c0c;
   border-color: transparent;
 }
 
@@ -97,16 +98,22 @@ body.xmas {
   justify-content: center;
 }
 
-.upload-row button { min-height: 40px; }
+.upload-row button {
+  min-height: 40px;
+  background: rgba(18, 10, 6, 0.66);
+  border-color: rgba(255, 138, 42, 0.45);
+  color: #ffd7b0;
+  backdrop-filter: blur(12px);
+}
 
 .alert {
   margin: 0;
   max-width: 40rem;
   text-align: center;
-  color: #ffd8cc;
+  color: #ffd2c6;
   font-size: 13px;
   line-height: 1.45;
-  background: rgba(54, 22, 24, 0.78);
+  background: rgba(72, 22, 16, 0.78);
   border: 1px solid rgba(255, 170, 140, 0.35);
   border-radius: 12px;
   padding: 8px 12px;
@@ -117,19 +124,19 @@ body.xmas {
   z-index: 8;
   top: max(10px, env(safe-area-inset-top));
   left: max(10px, env(safe-area-inset-left));
-  width: min(168px, 40vw);
+  width: min(176px, 42vw);
   border-radius: 16px;
   overflow: hidden;
-  background: rgba(8, 12, 24, 0.72);
-  border: 1px solid rgba(198, 214, 238, 0.28);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
+  background: rgba(16, 8, 4, 0.78);
+  border: 1px solid rgba(240, 195, 106, 0.38);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(12px);
 }
 
 .cam-stage {
   position: relative;
   aspect-ratio: 4 / 3;
-  background: #101624;
+  background: #1a100c;
   transform: scaleX(-1);
 }
 
@@ -139,7 +146,7 @@ body.xmas {
   inset: 0;
   display: grid;
   place-items: center;
-  color: rgba(214, 224, 240, 0.42);
+  color: rgba(246, 220, 170, 0.42);
   font-size: 12px;
   letter-spacing: 0.12em;
   transform: scaleX(-1);
@@ -163,43 +170,16 @@ body.xmas {
   padding: 6px 8px 2px;
   text-align: center;
   font-size: 12px;
-  color: #d5e0f2;
+  color: #ffe1b0;
 }
 
 .cam-card button {
   width: calc(100% - 16px);
   margin: 4px 8px 8px;
-  background: #e8eef8;
-  color: #151924;
+  background: #f0c36a;
+  color: #2a1c0c;
   border-color: transparent;
   min-height: 40px;
-}
-
-.ornaments {
-  position: fixed;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-}
-
-.ornament {
-  position: absolute;
-  width: 74px;
-  height: 94px;
-  border: 2px solid #ff7a18;
-  border-radius: 2px;
-  overflow: hidden;
-  background: #140e18;
-  box-shadow: 0 0 16px rgba(255, 122, 24, 0.28);
-  transform: translate(-50%, -50%) scale(var(--scale, 0));
-  opacity: var(--fade, 0);
-}
-
-.ornament img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
 .fallback {
@@ -210,30 +190,41 @@ body.xmas {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   pointer-events: none;
 }
 
-body.no-canvas .fallback { display: flex; }
+body.no-webgl .fallback { display: flex; }
 
-.fallback svg { width: min(240px, 62vw); height: auto; }
+.fallback-tree {
+  width: min(220px, 54vw);
+  height: min(280px, 46vh);
+  background:
+    radial-gradient(circle at 50% 8%, #fff1c4 0 7px, transparent 8px),
+    linear-gradient(#e23b3b, #e23b3b) 30% 42% / 10px 10px no-repeat,
+    linear-gradient(#2fbe78, #2fbe78) 68% 58% / 10px 10px no-repeat,
+    linear-gradient(#6aa7ff, #6aa7ff) 40% 70% / 10px 10px no-repeat,
+    linear-gradient(#f0c36a, #8a5a22);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35));
+}
+
 .fallback p {
   margin: 0;
-  color: #d5e0f2;
+  color: #f6e2b0;
   font-size: 13px;
 }
 
 @media (max-width: 720px) {
-  .dock { width: min(720px, calc(100% - 20px)); }
-  .merry { letter-spacing: 0.28em; text-indent: 0.28em; }
-  .wordmark { bottom: calc(196px + env(safe-area-inset-bottom)); }
-  .ornament { width: 58px; height: 74px; }
+  .dock { width: min(680px, calc(100% - 20px)); }
+  .merry { letter-spacing: 0.16em; text-indent: 0.16em; }
+  .wordmark { bottom: calc(214px + env(safe-area-inset-bottom)); }
 }
 
 @media (max-height: 680px) {
   .legend { font-size: 11px; }
-  .wordmark { bottom: calc(148px + env(safe-area-inset-bottom)); }
-  .cam-card { width: min(128px, 34vw); }
+  .wordmark { bottom: calc(156px + env(safe-area-inset-bottom)); }
+  .cam-card { width: min(132px, 34vw); }
 }
 
 @media (prefers-reduced-motion: reduce) {
